@@ -1,0 +1,241 @@
+/* ==========================================================================
+   V3 polish: a colourful title bar, readable gold type, smooth one-shot
+   reveals and ambient petals, sparkles and light rays. Everything that
+   loops moves only transform, rotate, translate or opacity.
+   ========================================================================== */
+
+/* ---------- Title bar: transparent over the painting, slimmer (still transparent) once scrolling ---------- */
+
+.site-header,
+.site-header.is-scrolled {
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+.site-header {
+  height: calc(var(--header-h) + 12px);
+  transition: height 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.site-header.is-scrolled { height: var(--header-h); }
+/* a soft fade behind the bar keeps it readable over light sections without becoming a solid bar */
+.site-header::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 -18px;
+  background: linear-gradient(180deg, rgb(30 4 10 / 0.55), rgb(30 4 10 / 0.25) 60%, transparent);
+  opacity: 0;
+  transition: opacity 0.45s;
+  pointer-events: none;
+}
+.site-header.is-scrolled::before { opacity: 1; }
+.site-header .site-header__bar { position: relative; }
+.site-header .monogram { color: #fff3d6; text-shadow: 0 1px 8px rgb(20 4 10 / 0.8); transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1); transform-origin: left center; }
+.site-header.is-scrolled .monogram { transform: scale(0.86); }
+.site-header .monogram em { color: #ffd76a; }
+.site-header .site-nav a { color: #fff3d6; text-shadow: 0 1px 8px rgb(20 4 10 / 0.85); }
+.site-header .site-nav a::after { background: #ffd76a; }
+.site-header .icon-btn { color: #ffd76a; border-color: #e0a526aa; background: rgb(20 4 10 / 0.25); }
+.site-header .icon-btn:hover { background: rgb(20 4 10 / 0.45); }
+.site-header.is-open { background: #4a0612; }
+.site-header.is-open::before { opacity: 0; }
+.scroll-progress { height: 3px; top: 0; bottom: auto; z-index: 2; background: linear-gradient(90deg, #ffd76a, #fff3c4, #e0a526); }
+.mobile-menu { background: radial-gradient(90% 50% at 50% 0%, #9b0f2a, transparent 70%), linear-gradient(170deg, #5c0616, #33030b); }
+.mobile-menu a { color: #fff3d6; }
+.mobile-menu li { border-bottom-color: #e0a52655; }
+.mobile-menu__foot { color: #ffd76a; }
+
+/* ---------- Shared flourishes ---------- */
+
+@keyframes turn { to { rotate: 1turn; } }
+
+.petals { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.petal {
+  position: absolute;
+  top: -30px;
+  border-radius: 60% 40% 60% 40%;
+  opacity: 0.9;
+  animation: petal-drop linear infinite, petal-sway ease-in-out infinite alternate;
+  animation-play-state: paused;
+  will-change: transform;
+}
+.petals.is-running .petal { animation-play-state: running; }
+@keyframes petal-drop { from { transform: translateY(-5vh) rotate(0deg); } to { transform: translateY(112vh) rotate(560deg); } }
+@keyframes petal-sway { from { translate: -22px 0; } to { translate: 22px 0; } }
+
+.sparkles { position: absolute; inset: -8% -14%; pointer-events: none; z-index: -1; }
+.sparkle {
+  position: absolute;
+  background: radial-gradient(circle, #fffbe0 0 16%, #ffd76a 42%, transparent 70%);
+  clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
+  animation: twinkle-star ease-in-out infinite;
+  will-change: transform, opacity;
+}
+@keyframes twinkle-star {
+  0%, 100% { transform: scale(0.2) rotate(0deg); opacity: 0; }
+  50% { transform: scale(1) rotate(45deg); opacity: 1; }
+}
+
+.rays {
+  position: absolute;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: repeating-conic-gradient(from 0deg, rgb(255 236 170 / 0.24) 0deg 4deg, transparent 4deg 15deg);
+  -webkit-mask-image: radial-gradient(closest-side, #000 18%, transparent 72%);
+  mask-image: radial-gradient(closest-side, #000 18%, transparent 72%);
+  animation: turn 90s linear infinite;
+  will-change: rotate;
+  pointer-events: none;
+}
+
+/* ---------- Hero: the earlier reveal, names in the title-bar colours ---------- */
+
+.hero__names .hero__name-inner {
+  background: linear-gradient(90deg, #4a0612 0%, #9b0f2a 28%, #c2410c 52%, #9b0f2a 76%, #4a0612 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent;
+  animation: none !important;
+  -webkit-text-stroke: 1.4px #f6d27a;
+  paint-order: stroke fill;
+  filter: drop-shadow(0 2px 0 rgb(255 243 196 / 0.75)) drop-shadow(0 6px 16px rgb(40 6 12 / 0.45));
+}
+.hero__amp { color: #9b0f2a; -webkit-text-fill-color: #c2410c; text-shadow: 0 1px 0 #fff3c4, 0 2px 10px rgb(255 243 196 / 0.8); }
+.hero__shloka, .hero__families { color: #fff3c4; text-shadow: 0 2px 10px rgb(30 4 10 / 0.85); }
+.hero__invite, .hero__place { color: #fffaf0; text-shadow: 0 2px 10px rgb(20 4 10 / 0.9); }
+.hero__date { color: #ffe28a; text-shadow: 0 2px 12px rgb(20 4 10 / 0.9); }
+
+/* ---------- 6 · Palace ---------- */
+
+.palace-sec__petals { z-index: 2; }
+.palace-sec__bg, .palace { will-change: transform; }
+
+/* ---------- 1 & 2 · Save the date: always coloured, always readable ---------- */
+
+.savedate { background: #0b1d5e; }
+.savedate__curtain {
+  clip-path: none !important;
+  background:
+    radial-gradient(60% 45% at 50% 38%, rgb(120 60 200 / 0.55), transparent 70%),
+    radial-gradient(80% 50% at 50% 100%, rgb(255 120 40 / 0.45), transparent 70%),
+    linear-gradient(180deg, #0b1d5e 0%, #2a1470 38%, #6a1050 72%, #a8102a 100%);
+}
+.savedate__mandala-wrap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(140vw, 1100px);
+  aspect-ratio: 1;
+  margin: calc(min(140vw, 1100px) / -2) 0 0 calc(min(140vw, 1100px) / -2);
+  pointer-events: none;
+}
+.savedate__mandala { position: static; translate: none; width: 100%; height: 100%; opacity: 0.26; animation: turn 160s linear infinite; }
+.savedate__title { color: #ffe9b0; text-shadow: 0 3px 18px rgb(10 0 30 / 0.8); }
+.savedate__frame {
+  background: radial-gradient(120% 100% at 50% 0%, rgb(24 12 70 / 0.82), rgb(34 6 34 / 0.86));
+  border: 1px solid #e0a526aa;
+  outline-color: #e0a52655;
+  border-radius: 6px;
+  box-shadow: 0 30px 60px -20px #000c;
+}
+.savedate__date { background: none !important; animation: none !important; -webkit-text-fill-color: initial; perspective: 600px; }
+.savedate__digit {
+  background: linear-gradient(175deg, #fffbe8 0%, #ffe28a 40%, #f2b33a 65%, #fff0b8 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 3px 0 rgb(60 20 0 / 0.5));
+}
+.savedate__digit.is-dot { color: transparent; }
+.savedate__weds { color: #ffe9b0; font-size: 0.82rem; }
+.savedate__weds span { color: #ffd76a; -webkit-text-fill-color: #ffd76a; }
+.savedate__place { color: #fffaf0; font-size: 1.05rem; }
+.savedate__time { color: #ffd98a; font-size: 0.74rem; letter-spacing: 0.2em; }
+.countdown__unit { background: rgb(20 10 60 / 0.6); border: 1px solid #e0a52666; border-radius: 12px; padding: 0.7rem 0.4rem 0.6rem; }
+.countdown__value { color: #fffaf0; text-shadow: 0 2px 12px rgb(10 0 30 / 0.8); }
+.countdown__label { color: #ffd98a; font-size: 0.7rem; }
+.savedate__fineprint { color: #ffe9b0; }
+.savedate .btn--ghost-light { color: #ffe9b0; border-color: #ffd76aaa; background: rgb(20 10 60 / 0.5); }
+
+/* ---------- 7 · Celebrations ---------- */
+
+.byday { position: relative; overflow: hidden; background: radial-gradient(70% 45% at 50% 20%, rgb(155 15 42 / 0.55), transparent 70%), var(--wall-deep); }
+.byday__head, .byday__days, .byday__pending { position: relative; z-index: 1; }
+.byday__art { position: relative; }
+.byday__shine { position: absolute; inset: 0; z-index: 2; border-radius: inherit; overflow: hidden; pointer-events: none; }
+.byday__shine::after {
+  content: "";
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: 0;
+  width: 38%;
+  background: linear-gradient(100deg, transparent, rgb(255 248 220 / 0.5), transparent);
+  transform: translateX(-160%) skewX(-18deg);
+  animation: arch-shine 7s ease-in-out infinite;
+}
+@keyframes arch-shine {
+  0%, 62% { transform: translateX(-160%) skewX(-18deg); }
+  88%, 100% { transform: translateX(420%) skewX(-18deg); }
+}
+.byday__ritual:nth-child(2) .byday__shine::after { animation-delay: 0.9s; }
+.byday__panel:nth-child(2) .byday__ritual:nth-child(1) .byday__shine::after { animation-delay: 1.8s; }
+.byday__panel:nth-child(2) .byday__ritual:nth-child(2) .byday__shine::after { animation-delay: 2.7s; }
+.byday__ritual { transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+@media (hover: hover) {
+  .byday__ritual:hover { transform: translateY(-8px); }
+}
+.byday__daynum { box-shadow: 0 0 0 3px rgb(224 165 38 / 0.25), 0 4px 14px rgb(224 165 38 / 0.35); }
+
+/* ---------- 3 · Details: a parchment card on the palace wall ---------- */
+
+.details {
+  overflow: hidden;
+  background: radial-gradient(80% 60% at 50% 30%, #9b0f2a 0%, #5c0616 55%, #33030b 100%);
+}
+.details::before { opacity: 1; filter: none; }
+.details__inner {
+  position: relative;
+  z-index: 1;
+  max-width: 52rem;
+  padding: clamp(1.6rem, 4vw, 3rem) clamp(1rem, 4vw, 3rem);
+  border-radius: 16px;
+  background: radial-gradient(120% 80% at 50% 0%, #fffdf6, #f8ecd4);
+  box-shadow: 0 0 0 2px #e0a526, 0 0 0 8px #fffaf0, 0 0 0 10px #e0a526, 0 40px 80px -30px #000;
+}
+.details__petals { z-index: 0; }
+
+/* ---------- 4 · Closing: names that slowly change colour ---------- */
+
+/* the gold drifts towards saffron and rose and back: a GPU filter, no repaint */
+.closing__names { animation: colour-shift 7s ease-in-out infinite alternate; will-change: filter; }
+@keyframes colour-shift {
+  0% { filter: hue-rotate(0deg) saturate(1); }
+  50% { filter: hue-rotate(-28deg) saturate(1.35); }
+  100% { filter: hue-rotate(-48deg) saturate(1.2) brightness(1.08); }
+}
+
+/* ---------- Reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .petals, .sparkles { display: none; }
+  .rays, .savedate__mandala, .byday__shine::after, .closing__names { animation: none; }
+}
+
+/* gold type holds still: a moving shimmer would redraw large headings on every frame */
+.foil, .hero__names .hero__name-inner, .blessings__title, .palace-sec__title, .savedate__date, .gate__names, .gold-text { animation: none !important; background-position: 35% 50%; }
+.gate__open { animation: gate-pulse 2.4s var(--ease-in-out) infinite !important; }
+.closing__names { background-position: 35% 50%; }
+.details__directions { margin-top: 0.9rem; }
+
+/* ---------- Painted section backdrops (ghats, Sangam, pheras) ---------- */
+.backdrop { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.backdrop__img { width: 100%; height: 100%; object-fit: cover; }
+.backdrop__veil { position: absolute; inset: 0; }
+.backdrop--blessings { z-index: -1; }
+.backdrop--blessings .backdrop__veil { background: linear-gradient(180deg, rgb(74 6 18 / 0.86) 0%, rgb(92 6 22 / 0.66) 45%, rgb(51 3 11 / 0.9) 100%); }
+.backdrop--details { z-index: 0; }
+.backdrop--details .backdrop__veil { background: radial-gradient(70% 60% at 50% 45%, rgb(74 6 18 / 0.35), rgb(51 3 11 / 0.82) 100%); }
+.backdrop--closing { z-index: -2; }
+.backdrop--closing .backdrop__veil { background: radial-gradient(42% 48% at 50% 45%, rgb(20 4 10 / 0.7), rgb(20 4 10 / 0.3) 70%), linear-gradient(180deg, rgb(20 4 10 / 0.35), transparent 30%, transparent 70%, rgb(20 4 10 / 0.75)); }
+.backdrop--closing ~ .closing__river, .closing:has(.backdrop--closing) .closing__sky { opacity: 0.35; }

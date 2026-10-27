@@ -51,7 +51,6 @@
 }
 
 @keyframes fade-in { from { opacity: 0; } }
-@keyframes lightbox-in { from { opacity: 0; transform: scale(0.97); } }
 
 .diya-flame {
   transform-box: fill-box;

@@ -31,7 +31,8 @@ async function open(label, ctxOpts) {
   page.on("requestfailed", (r) => errors.push(`requestfailed: ${r.url()}`));
   page.on("response", (r) => r.status() >= 400 && errors.push(`http ${r.status()}: ${r.url()}`));
   await page.goto(URL_, { waitUntil: "networkidle" });
-  await page.waitForTimeout(4800); // hero intro
+  await page.keyboard.press("Enter"); // open the temple doors
+  await page.waitForTimeout(4800); // doors + hero intro
   return { ctx, page, errors, label };
 }
 
@@ -63,7 +64,7 @@ async function tour({ page, label }, steps) {
   // nav links reach their sections
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.waitForTimeout(500);
-  for (const id of ["story", "traditions", "wedding-day", "gallery", "details"]) {
+  for (const id of ["blessings", "story", "traditions", "wedding-day", "details"]) {
     await page.click(`.site-nav a[href="#${id}"]`);
     await page.waitForTimeout(1600);
     const top = await page.evaluate((id) => {
@@ -107,28 +108,6 @@ async function tour({ page, label }, steps) {
   const clip = await page.evaluate(() => navigator.clipboard.readText()).catch(() => "");
   check("share copies link", clip.startsWith(URL_), clip);
 
-  // gallery + lightbox
-  await page.click('.site-nav a[href="#gallery"]');
-  await page.waitForTimeout(1600);
-  await page.locator(".gallery__item").first().click();
-  await page.waitForSelector(".lightbox");
-  check("lightbox opens with focus on close", await page.evaluate(() => document.activeElement?.classList.contains("lightbox__close")));
-  await page.screenshot({ path: path.join(outDir, "desktop-lightbox.png") });
-  const cap1 = await page.locator(".lightbox figcaption .label").first().innerText();
-  await page.keyboard.press("ArrowRight");
-  const cap2 = await page.locator(".lightbox figcaption .label").first().innerText();
-  await page.keyboard.press("ArrowLeft");
-  const cap3 = await page.locator(".lightbox figcaption .label").first().innerText();
-  check("lightbox arrow keys", cap1 !== cap2 && cap1 === cap3, `${cap1} → ${cap2} → ${cap3}`);
-  for (let i = 0; i < 5; i++) await page.keyboard.press("Tab");
-  check("lightbox traps focus", await page.evaluate(() => !!document.activeElement?.closest(".lightbox")));
-  const yBefore = await page.evaluate(() => scrollY);
-  await page.keyboard.press("Escape");
-  await page.waitForTimeout(300);
-  check("lightbox Escape closes, focus returns, scroll kept",
-    (await page.locator(".lightbox").count()) === 0 &&
-      (await page.evaluate(() => document.activeElement?.classList.contains("gallery__item"))) &&
-      Math.abs((await page.evaluate(() => scrollY)) - yBefore) < 2);
   const broken = await page.evaluate(() => [...document.images].filter((i) => i.complete && i.naturalWidth === 0).map((i) => i.src));
   check("no broken images (loaded so far)", broken.length === 0, broken.join(", "));
 
@@ -143,9 +122,11 @@ async function tour({ page, label }, steps) {
   check("wishes: honest local preview", status.toLowerCase().includes("preview — not sent") && status.includes("Meera"));
   await page.locator(".wishes__form").screenshot({ path: path.join(outDir, "desktop-wishes.png") });
 
-  // venue honesty
+  // venue: name, directions link and map, and no ceremony time anywhere
   const details = await page.locator("#details").innerText();
-  check("venue placeholder shown, no map", details.includes("Celebration venue details will be shared soon.") && (await page.locator("#details iframe").count()) === 0);
+  const dirHref = await page.locator(".details__directions").getAttribute("href");
+  check("venue, directions and map shown", details.includes("Shivaya Vatika") && dirHref?.startsWith("https://www.google.com/maps/dir/?api=1&destination=Shivaya") && (await page.locator("#details iframe").count()) === 1, dirHref ?? "");
+  check("no ceremony time shown", !/to be announced|ceremony time/i.test(await page.evaluate(() => document.body.innerText)));
 
   // sound toggle
   await page.click(".sound-toggle");
@@ -173,23 +154,10 @@ for (const [label, width, height] of [["mobile360", 360, 740], ["mobile390", 390
     await page.click(".menu-toggle");
     await page.waitForTimeout(300);
     await page.screenshot({ path: path.join(outDir, `${label}-menu.png`) });
-    await page.click('.mobile-menu a[href="#gallery"]');
+    await page.click('.mobile-menu a[href="#details"]');
     await page.waitForTimeout(1600);
-    const top = await page.evaluate(() => document.getElementById("gallery").getBoundingClientRect().top);
-    check(`${label}: mobile menu → gallery`, Math.abs(top) < 80 && (await page.locator(".mobile-menu").isHidden()), `top ${Math.round(top)}`);
-    // swipe in lightbox
-    await page.locator(".gallery__item").first().tap();
-    await page.waitForSelector(".lightbox");
-    const c1 = await page.locator(".lightbox figcaption .label").first().innerText();
-    await page.evaluate(() => {
-      const el = document.querySelector(".lightbox");
-      const t = (x) => new Touch({ identifier: 1, target: el, clientX: x, clientY: 300 });
-      el.dispatchEvent(new TouchEvent("touchstart", { touches: [t(300)], changedTouches: [t(300)], bubbles: true }));
-      el.dispatchEvent(new TouchEvent("touchend", { touches: [], changedTouches: [t(120)], bubbles: true }));
-    });
-    const c2 = await page.locator(".lightbox figcaption .label").first().innerText();
-    check(`${label}: swipe to next image`, c1 !== c2, `${c1} → ${c2}`);
-    await page.screenshot({ path: path.join(outDir, `${label}-lightbox.png`) });
+    const top = await page.evaluate(() => document.getElementById("details").getBoundingClientRect().top);
+    check(`${label}: mobile menu → details`, Math.abs(top) < 80 && (await page.locator(".mobile-menu").isHidden()), `top ${Math.round(top)}`);
   }
   const clipped = await page.evaluate(() =>
     [...document.querySelectorAll(".hero__names, .couple__title, .closing__names, .savedate__date")]

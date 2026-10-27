@@ -25,8 +25,8 @@ export function PrayagrajStory() {
         scrollTrigger: {
           trigger: el,
           start: "top top",
-          end: desktop ? "+=180%" : "+=120%",
-          scrub: 0.6,
+          end: desktop ? "+=85%" : "+=60%",
+          scrub: 0.3,
           pin: q(".sangam__stage")[0],
           anticipatePin: 1,
         },
@@ -37,7 +37,7 @@ export function PrayagrajStory() {
         { clipPath: "inset(0% 0% 0% 0% round 0px 0px 0px 0px)", duration: 0.45, ease: EASE.inOut },
         0,
       )
-        .fromTo(q(".sangam__mask .scene"), { scale: 1.18 }, { scale: 1, duration: 0.6, ease: EASE.soft }, 0);
+        .fromTo(q(".sangam__mask .scene, .sangam__photo"), { scale: 1.18 }, { scale: 1, duration: 0.6, ease: EASE.soft }, 0);
 
       q(".scene__layer").forEach((layer) => {
         const depth = Number((layer as HTMLElement).dataset.depth ?? 0);

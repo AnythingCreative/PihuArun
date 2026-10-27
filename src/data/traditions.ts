@@ -1,4 +1,5 @@
 import type { TraditionArtKey } from "../components/scenes/TraditionArt";
+import { wedding } from "../config/wedding";
 
 export interface Tradition {
   id: string;
@@ -10,23 +11,16 @@ export interface Tradition {
   art: TraditionArtKey;
   /** Photo slot from scripts/fetch-photos.mjs; used instead of the illustration once fetched. */
   photoSlot: string;
+  /** Day of the ceremony, YYYY-MM-DD. Leave out until the families confirm it. */
+  date?: string;
 }
 
 /**
- * Illustrative cultural themes — not the couple's event schedule. Replace,
- * reorder or remove entries to match the families' own traditions.
+ * The wedding's rituals, in order. A ritual shows its date only once it is
+ * confirmed: Haldi and Mehendi on 23 November, Mandap and Pheras on the
+ * wedding day. Sangeet's date is not fixed yet.
  */
 export const traditions: Tradition[] = [
-  {
-    id: "ganesh-vandana",
-    name: "Ganesh Vandana",
-    hindi: "गणेश वंदना",
-    meaning: "An auspicious beginning",
-    description:
-      "Every sacred undertaking begins by remembering Shri Ganesh, the remover of obstacles, and asking his blessing for the path ahead.",
-    art: "ganesh",
-    photoSlot: "ganesh",
-  },
   {
     id: "haldi",
     name: "Haldi",
@@ -36,6 +30,7 @@ export const traditions: Tradition[] = [
       "Family and friends anoint the bride and groom with turmeric paste — a golden blessing of health, radiance and happiness, shared with laughter.",
     art: "haldi",
     photoSlot: "haldi",
+    date: "2026-11-23",
   },
   {
     id: "mehendi",
@@ -46,6 +41,17 @@ export const traditions: Tradition[] = [
       "Intricate henna patterns bloom across the hands, drawn slowly and with care, as songs and music fill the gathering.",
     art: "mehendi",
     photoSlot: "mehendi",
+    date: "2026-11-23",
+  },
+  {
+    id: "sangeet",
+    name: "Sangeet",
+    hindi: "संगीत",
+    meaning: "Music, dance and laughter",
+    description:
+      "The families meet in song: dholak beats, ghungroo and old wedding geet fill the night as everyone dances together before the big day.",
+    art: "haldi",
+    photoSlot: "marigold",
   },
   {
     id: "mandap",
@@ -56,6 +62,7 @@ export const traditions: Tradition[] = [
       "Beneath the mandap, before the sacred fire and in the presence of family, the couple make their vows and begin a shared life.",
     art: "mandap",
     photoSlot: "mandap",
+    date: wedding.date,
   },
   {
     id: "saat-phere",
@@ -66,5 +73,6 @@ export const traditions: Tradition[] = [
       "Tied together, the couple walk around Agni seven times; each circle is a promise to walk through life side by side.",
     art: "pheras",
     photoSlot: "pheras",
+    date: wedding.date,
   },
 ];

@@ -46,7 +46,7 @@ export interface WeddingConfig {
   /** Optional licensed music file (e.g. "music/shehnai.mp3" in /public). */
   musicUrl: string;
 
-  /** Public URL of the site. Filled in automatically at build time on Netlify, Vercel, Cloudflare Pages and GitHub Pages (see vite.config.ts); set SITE_URL to override. */
+  /** Final public URL of the site, once published. Used for canonical/share. */
   siteUrl: string;
 }
 
@@ -60,10 +60,10 @@ export const wedding: WeddingConfig = {
   state: "Uttar Pradesh",
   country: "India",
 
-  venueName: "",
-  venueAddress: "",
-  venueMapQuery: "",
-  showMapEmbed: false,
+  venueName: "Shivaya Vatika",
+  venueAddress: "128A, 20N, Dev Ln, Nyay Nagar, Dhoomanganj, Prayagraj 211011",
+  venueMapQuery: "https://maps.app.goo.gl/8gf1BgcXyqkXofj7A",
+  showMapEmbed: true,
   transportNotes: "",
   parkingNotes: "",
 
@@ -75,6 +75,7 @@ export const wedding: WeddingConfig = {
 
   musicUrl: "",
 
+  // filled in at build time with the live address (GitHub Pages sets it); empty in local previews
   siteUrl: import.meta.env.VITE_SITE_URL ?? "",
 };
 
@@ -88,7 +89,7 @@ export function missingDetails(c: WeddingConfig = wedding): string[] {
   return missing;
 }
 
-export const hasVenue = () => Boolean(wedding.venueName || wedding.venueAddress);
+export const hasVenue = () => Boolean(wedding.venueName || wedding.venueAddress || wedding.venueMapQuery);
 export const hasCeremonyTime = () => /^\d{2}:\d{2}$/.test(wedding.ceremonyStart);
 
 /** Exact instant the ceremony (or, if the time is unknown, the day) begins. */

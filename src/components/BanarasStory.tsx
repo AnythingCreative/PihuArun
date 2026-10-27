@@ -4,9 +4,9 @@ import { assets, publicUrl } from "../data/assets";
 import { EASE, MQ, gsap } from "../lib/motion";
 
 const FRAMES = [
-  { key: "ghats", caption: "The ghats at dusk", Scene: GhatsScene },
-  { key: "diyas", caption: "Lamps upon the river", Scene: DiyaWaterScene },
-  { key: "silk", caption: "Banarasi silk & brass", Scene: BrocadeScene },
+  { key: "ghats", caption: "The ghats at first light", Scene: GhatsScene },
+  { key: "temple", caption: "A temple shikhara, Kashi", Scene: DiyaWaterScene },
+  { key: "river", caption: "The Ganga at Varanasi", Scene: BrocadeScene },
 ];
 
 /**
@@ -36,8 +36,8 @@ export function BanarasStory() {
         scrollTrigger: {
           trigger: el,
           start: "top top",
-          end: desktop ? "+=260%" : "+=180%",
-          scrub: 0.7,
+          end: desktop ? "+=130%" : "+=90%",
+          scrub: 0.3,
           pin: q(".banaras__stage")[0],
           anticipatePin: 1,
         },

@@ -1,6 +1,12 @@
 import { useLayoutEffect, useRef } from "react";
 import { wedding, displayDate, place } from "../config/wedding";
-import { CornerFlourish, GaneshMotif, Mandala, MarigoldPetal } from "./ornaments/Ornaments";
+import { CornerFlourish, GaneshMotif, MarigoldPetal } from "./ornaments/Ornaments";
+import { KailashScene } from "./v2/KailashScene";
+
+import { art, publicUrl } from "../data/assets";
+
+const heroArt = art("hero-kailash", "");
+const heroArtMobile = art("hero-kailash-mobile", "");
 import { DUR, EASE, MQ, gsap } from "../lib/motion";
 import { scrollToSection } from "../lib/scrollTo";
 
@@ -21,12 +27,14 @@ export function InvitationHero() {
 
     mm.add(MQ.motion, () => {
       const q = gsap.utils.selector(el);
-      const tl = gsap.timeline({ defaults: { ease: EASE.out } });
-      tl.from(q(".hero__paper"), { opacity: 0, duration: DUR.base })
+      // the intro waits behind the temple doors and plays as they swing open
+      const tl = gsap.timeline({ defaults: { ease: EASE.out }, paused: !document.documentElement.classList.contains("gate-opened") });
+      const play = () => tl.delay(0.6).play();
+      window.addEventListener("gate:open", play, { once: true });
+      tl.from(q(".kailash, .hero__art"), { opacity: 0, scale: 1.08, duration: 2.6, ease: EASE.soft })
         .from(q(".hero__line--h"), { scaleX: 0, duration: DUR.slow, ease: EASE.inOut, stagger: 0.1 }, 0.2)
         .from(q(".hero__line--v"), { scaleY: 0, duration: DUR.slow, ease: EASE.inOut, stagger: 0.1 }, 0.2)
         .fromTo(q(".hero__corner path"), { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: DUR.slow, ease: EASE.inOut }, 0.5)
-        .from(q(".hero__mandala"), { opacity: 0, scale: 0.94, duration: 2.4 }, 0.6)
         .fromTo(q(".hero__ganesh path"), { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1.8, ease: EASE.inOut, stagger: 0.03 }, 0.9)
         .from(q(".hero__shloka, .hero__families"), { opacity: 0, y: 10, duration: DUR.base, stagger: 0.15 }, 1.3)
         .from(q(".hero__name--groom .hero__name-inner"), { yPercent: 105, duration: 1.3 }, 1.7)
@@ -42,11 +50,13 @@ export function InvitationHero() {
         ease: EASE.none,
         scrollTrigger: { trigger: el, start: "top top", end: "bottom top", scrub: true },
       });
-      gsap.to(q(".hero__mandala"), {
-        rotate: 25,
-        ease: EASE.none,
-        scrollTrigger: { trigger: el, start: "top top", end: "bottom top", scrub: true },
+      if (heroArt) gsap.to(q(".hero__art"), { yPercent: 10, ...(window.matchMedia("(min-width: 1024px)").matches ? { scale: 1.06 } : {}), ease: EASE.none, scrollTrigger: { trigger: el, start: "top top", end: "bottom top", scrub: true } });
+      // the Himalayan layers part at different speeds as the guest scrolls
+      q(".kailash__layer").forEach((layer) => {
+        const depth = Number((layer as unknown as SVGGElement).dataset.depth ?? 0);
+        gsap.to(layer, { yPercent: depth * 3.2, ease: EASE.none, scrollTrigger: { trigger: el, start: "top top", end: "bottom top", scrub: true } });
       });
+      return () => window.removeEventListener("gate:open", play);
     });
 
     mm.add(MQ.reduce, () => {
@@ -58,8 +68,16 @@ export function InvitationHero() {
 
   return (
     <section id="top" ref={root} className="hero" aria-labelledby="hero-title" data-flush>
-      <div className="hero__paper grain" aria-hidden>
-        <div className="hero__glow" />
+      <div className="hero__backdrop" aria-hidden>
+        {heroArt ? (
+          <picture>
+            {heroArtMobile && <source media="(max-width: 720px)" srcSet={heroArtMobile.srcSet} sizes="100vw" />}
+            <img className="hero__art" src={publicUrl(heroArt.src)} srcSet={heroArt.srcSet} sizes="100vw" width={heroArt.width} height={heroArt.height} alt="" fetchPriority="high" />
+          </picture>
+        ) : (
+          <KailashScene />
+        )}
+        <div className="hero__tint" />
       </div>
 
       <div className="hero__frame" aria-hidden>
@@ -72,8 +90,6 @@ export function InvitationHero() {
         <CornerFlourish className="hero__corner hero__corner--bl" />
         <CornerFlourish className="hero__corner hero__corner--br" />
       </div>
-
-      <Mandala className="hero__mandala" aria-hidden />
 
       <div className="hero__petals" aria-hidden>
         {PETALS.map((p, i) => (

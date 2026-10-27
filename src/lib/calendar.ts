@@ -40,8 +40,8 @@ export function buildIcs(c: WeddingConfig = wedding, now = new Date()): string {
   const venue = [c.venueName, c.venueAddress].filter(Boolean).join(", ");
   const location = venue || fullPlace();
   const notes: string[] = [`With love and blessings, join ${c.groom} and ${c.bride} as they begin their new journey together.`];
-  if (!hasCeremonyTime()) notes.push("Ceremony time to be announced.");
-  if (!venue) notes.push("Venue details to follow.");
+  const place = [c.venueName, c.venueAddress].filter(Boolean).join(", ");
+  if (place) notes.push(`Directions: https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place)}`);
   if (c.siteUrl) notes.push(c.siteUrl);
 
   const lines = [

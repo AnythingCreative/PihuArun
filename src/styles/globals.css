@@ -6,11 +6,11 @@
 
 :root {
   /* Palette */
-  --burgundy: #781f2b;
-  --burgundy-deep: #4e1219;
-  --vermilion: #b64032;
-  --gold: #c8a45d;
-  --gold-soft: #e7d4a3;
+  --burgundy: #9b0f2a;
+  --burgundy-deep: #5c0616;
+  --vermilion: #e2372b;
+  --gold: #e0a526;
+  --gold-soft: #f6d27a;
   --ivory: #f7f1e7;
   --cream: #ede2cf;
   --parchment: #e9dcc3;
@@ -18,6 +18,16 @@
   --ink: #33241f;
   --ink-soft: #5b4a41;
   --night: #17120f;
+
+  /* Chapter colours (photo-first redesign) */
+  --royal: #1a3fa0;
+  --royal-deep: #0a1d5c;
+  --blush: #ffe0e6;
+  --peach: #f4c3ad;
+  --rose: #d6246e;
+  --rose-deep: #6e0f3a;
+  --emerald: #0f6b4f;
+  --emerald-deep: #073d2d;
 
   /* Semantic */
   --bg: var(--ivory);
@@ -27,10 +37,11 @@
   --focus: var(--vermilion);
 
   /* Type */
-  --font-display: "Cormorant Garamond", "Cormorant", "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-display: "Rozha One", "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --font-accent: "Cormorant Garamond", Georgia, serif;
   --font-serif: "EB Garamond", "Cormorant Garamond", Georgia, "Times New Roman", serif;
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-deva: "Noto Serif Devanagari", "Nirmala UI", "Mangal", "Kohinoor Devanagari", serif;
+  --font-deva: "Yatra One", "Noto Serif Devanagari", "Nirmala UI", "Mangal", "Kohinoor Devanagari", serif;
 
   --fs-label: clamp(0.68rem, 0.62rem + 0.25vw, 0.8rem);
   --fs-small: clamp(0.9rem, 0.86rem + 0.2vw, 1rem);

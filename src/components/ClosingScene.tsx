@@ -5,6 +5,8 @@ import { Diya, CornerFlourish } from "./ornaments/Ornaments";
 import { useInView } from "../hooks/useInView";
 import { scrollToSection } from "../lib/scrollTo";
 import { shareInvitation } from "../lib/share";
+import { SkyLanterns } from "./v2/SkyLanterns";
+import { SectionBackdrop } from "./v2/SectionBackdrop";
 import { EASE, MQ, gsap } from "../lib/motion";
 
 const DIYAS = [
@@ -39,7 +41,9 @@ export function ClosingScene() {
   return (
     <section id="blessing" ref={root} className={`closing on-dark ${active ? "is-active" : ""}`} aria-labelledby="closing-title">
       <div className="closing__sky" aria-hidden />
+      <SectionBackdrop slot="couple-pheras" className="backdrop--closing" />
       <div className="closing__river" aria-hidden />
+      <SkyLanterns className="lanterns--closing" count={10} />
       <div className="closing__particles" aria-hidden>
         {Array.from({ length: 18 }, (_, i) => (
           <span key={i} style={{ left: `${(i * 41 + 7) % 100}%`, animationDelay: `${-i * 1.3}s`, animationDuration: `${11 + (i % 5) * 2}s` }} />
@@ -85,7 +89,7 @@ export function ClosingScene() {
             className="btn btn--ghost-light"
             onClick={async () => {
               const r = await shareInvitation();
-              setShared(r === "copied" ? "Link copied." : r === "shared" ? "Thank you for sharing." : r === "failed" ? "Please copy the address from your browser." : "");
+              setShared(r === "copied" ? "Link copied." : r === "shared" ? "Thank you for sharing." : r === "whatsapp" ? "Opening WhatsApp…" : r === "failed" ? `Share this address: ${window.location.href.split("#")[0]}` : "");
             }}
           >
             <Share2 aria-hidden /> Share

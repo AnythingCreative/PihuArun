@@ -1,14 +1,18 @@
 import { useEffect } from "react";
 import { Navigation } from "./components/Navigation";
 import { InvitationHero } from "./components/InvitationHero";
-import { InvitationReveal } from "./components/InvitationReveal";
-import { PrayagrajStory } from "./components/PrayagrajStory";
-import { BanarasStory } from "./components/BanarasStory";
-import { CoupleStory } from "./components/CoupleStory";
+import { TempleGate } from "./components/v2/TempleGate";
+import { Blessings } from "./components/v2/Blessings";
+import { PalaceCouple } from "./components/v2/PalaceCouple";
+import { SkyLanterns } from "./components/v2/SkyLanterns";
+import { CelebrationsByDay } from "./components/v2/CelebrationsByDay";
+import { CelebrationsDeck } from "./components/v2/CelebrationsDeck";
+
+/** Which celebrations layout to show: "deck" (fanned cards), "byDay" (two day panels) or "row" (swipeable cards). */
+const CELEBRATIONS_LAYOUT = "byDay" as "deck" | "byDay" | "row";
 import { WeddingTraditions } from "./components/WeddingTraditions";
 import { WeddingCountdown } from "./components/WeddingCountdown";
 import { EventDetails } from "./components/EventDetails";
-import { WeddingGallery } from "./components/WeddingGallery";
 import { GuestWishes } from "./components/GuestWishes";
 import { ClosingScene } from "./components/ClosingScene";
 import { BackToTop } from "./components/BackToTop";
@@ -25,7 +29,7 @@ export default function App() {
     document.fonts?.ready.then(() => {
       if (!cancelled) ScrollTrigger.refresh();
     });
-    // Honour a deep link such as /#gallery once pins exist.
+    // Honour a deep link such as /#details once pins exist.
     const id = window.location.hash.slice(1);
     const t = id ? window.setTimeout(() => scrollToSection(id), 300) : 0;
 
@@ -44,20 +48,19 @@ export default function App() {
       <a className="skip-link" href="#wedding-day" onClick={(e) => { e.preventDefault(); scrollToSection("wedding-day"); }}>
         Skip to the wedding date
       </a>
+      <TempleGate />
       <Navigation />
       <main>
         <InvitationHero />
-        <InvitationReveal />
-        <PrayagrajStory />
-        <BanarasStory />
-        <CoupleStory />
-        <WeddingTraditions />
+        <Blessings />
+        <PalaceCouple />
+        {CELEBRATIONS_LAYOUT === "deck" ? <CelebrationsDeck /> : CELEBRATIONS_LAYOUT === "byDay" ? <CelebrationsByDay /> : <WeddingTraditions />}
         <WeddingCountdown />
         <EventDetails />
-        <WeddingGallery />
         <GuestWishes />
         <ClosingScene />
       </main>
+      <SkyLanterns className="lanterns--page" count={typeof window !== "undefined" && window.matchMedia("(max-width: 720px)").matches ? 5 : 7} scale={0.7} />
       <BackToTop />
     </>
   );

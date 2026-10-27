@@ -1,0 +1,138 @@
+{
+  "couple-pheras": {
+    "base": "art/web/couple-pheras",
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "width": 1920,
+    "height": 1071
+  },
+  "couple-portrait": {
+    "base": "art/web/couple-portrait",
+    "widths": [
+      640,
+      1280
+    ],
+    "width": 1280,
+    "height": 1715
+  },
+  "doors": {
+    "base": "art/web/doors",
+    "widths": [
+      640
+    ],
+    "width": 640,
+    "height": 1147
+  },
+  "ganesh": {
+    "base": "art/web/ganesh",
+    "widths": [
+      640,
+      1280
+    ],
+    "width": 1280,
+    "height": 1715
+  },
+  "ghats-bg": {
+    "base": "art/web/ghats-bg",
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "width": 1920,
+    "height": 1071
+  },
+  "haldi": {
+    "base": "art/web/haldi",
+    "widths": [
+      640,
+      1280
+    ],
+    "width": 1280,
+    "height": 1715
+  },
+  "hero-kailash-mobile": {
+    "base": "art/web/hero-kailash-mobile",
+    "widths": [
+      640
+    ],
+    "width": 640,
+    "height": 1147
+  },
+  "hero-kailash": {
+    "base": "art/web/hero-kailash",
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "width": 1920,
+    "height": 1071
+  },
+  "mandap": {
+    "base": "art/web/mandap",
+    "widths": [
+      640,
+      1280
+    ],
+    "width": 1280,
+    "height": 1715
+  },
+  "mehendi": {
+    "base": "art/web/mehendi",
+    "widths": [
+      640,
+      1280
+    ],
+    "width": 1280,
+    "height": 1715
+  },
+  "palace": {
+    "base": "art/web/palace",
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "width": 1920,
+    "height": 1071
+  },
+  "pheras": {
+    "base": "art/web/pheras",
+    "widths": [
+      640
+    ],
+    "width": 640,
+    "height": 857
+  },
+  "sangam-bg": {
+    "base": "art/web/sangam-bg",
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "width": 1920,
+    "height": 1071
+  },
+  "sangeet": {
+    "base": "art/web/sangeet",
+    "widths": [
+      640
+    ],
+    "width": 640,
+    "height": 857
+  },
+  "shiv-parvati": {
+    "base": "art/web/shiv-parvati",
+    "widths": [
+      640,
+      1280
+    ],
+    "width": 1280,
+    "height": 1715
+  }
+}

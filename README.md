@@ -21,22 +21,6 @@ npm run qa         # browser QA against the build (screenshots in .qa/)
 GitHub Pages, Cloudflare Pages, S3). `base: "./"` makes it work from a
 sub-path too.
 
-## Hosting
-
-The site is a static build (`dist/`). This repository is ready for any of these:
-
-| Host | How | Private repo? |
-|---|---|---|
-| **Netlify** (recommended) | app.netlify.com → Add new site → Import from GitHub → pick this repo. `netlify.toml` sets everything. | Free |
-| **Vercel** | vercel.com → Add New Project → import this repo. `vercel.json` sets everything. | Free |
-| **Cloudflare Pages** | dash.cloudflare.com → Workers & Pages → Create → Pages → connect repo. Build command `npm run build`, output `dist`. | Free |
-| **GitHub Pages** | Settings → Pages → Source: **GitHub Actions**. `.github/workflows/deploy.yml` builds and publishes on every push to `main`. | Needs a public repo or GitHub Pro |
-
-The public address is detected at build time on all four (see `vite.config.ts`), so link previews on
-WhatsApp and social media get an absolute preview image, a canonical URL is added, and the
-calendar file and Share button use the real address. For a custom domain, set the build
-environment variable `SITE_URL=https://your-domain/`.
-
 ## Fill in the wedding details
 
 Everything lives in **`src/config/wedding.ts`**. Empty fields are shown
@@ -53,7 +37,7 @@ is invented.
 | `rsvpUrl` | Adds an RSVP button |
 | `wishesEmail` | Wishes form opens the guest's mail app addressed to this e-mail (otherwise: local preview, clearly marked "not sent") |
 | `musicUrl` | Plays this licensed file; without it the sound toggle plays a soft tanpura drone synthesised in the browser |
-| `siteUrl` | Filled in automatically when hosted (see Hosting); used for sharing, the calendar file and link previews |
+| `siteUrl` | Used for sharing; also add a canonical link and absolute OG URLs in `index.html` |
 
 ## Photographs
 
@@ -71,9 +55,25 @@ Allahabad. Review `public/photos/_review.jpg`; to swap one, run e.g.
 `PICK=1 npm run photos -- haldi`. Requires network access to
 `commons.wikimedia.org` and `upload.wikimedia.org`.
 
-**Your own photos.** Put files in `public/` and edit `src/data/assets.ts`
-(portraits of Arun, Pratima, the couple, or any scene) and
-`src/data/gallery.ts` (gallery list, with real `width`/`height` and `alt`).
+**Unsplash photos.** `npm run unsplash` downloads the hand-picked Unsplash
+photos listed in `scripts/fetch-unsplash.mjs` (places, temples, hands and
+objects only, no faces) and merges them into `src/data/photos.json`.
+`TITLE="File:x.jpg" npm run photos -- <slot>` swaps in an exact Commons file.
+
+**AI-painted artwork (V2).** Generate the images listed in `AI-ART-PROMPTS.md`,
+save them in `art-source/` (kept out of the published site) with the file names given there, and run
+`npm run art-in`. Each slot (hero, Ganesh, Shiv-Parvati, palace, couple
+portrait, pheras, ritual cards) replaces its hand-drawn or photo fallback.
+V1 (the photo-first version) is kept in `../v1-photo-first/`. Stock photos and old placeholders no longer used are kept in `asset-archive/`.
+
+**Link preview.** `npm run og` re-renders `public/og-image.jpg` (the picture WhatsApp shows) from the painted hero. Once the site has a domain, set `siteUrl` and make `og:image` in `index.html` a full https URL.
+
+The site asks search engines not to index it (`robots.txt` and a `noindex` tag) and browsers not to translate it.
+
+**Your own photos.** Drop JPG/PNG/WebP files into `public/couple/` and run
+`npm run couple`. A file named with `hero` fills the opening screen; names
+containing `arun` / `pratima` / `pihu` become the portraits; the rest become
+the story prints and lead the gallery.
 
 `npm run art` re-renders the illustrated gallery placeholders, the social
 preview image (`public/og-image.jpg`) and the PNG icons from the site's own

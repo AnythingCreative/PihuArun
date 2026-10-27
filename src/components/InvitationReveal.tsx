@@ -29,8 +29,8 @@ export function InvitationReveal() {
         scrollTrigger: {
           trigger: el,
           start: "top top",
-          end: ctx.conditions.desktop ? "+=150%" : "+=110%",
-          scrub: 0.6,
+          end: ctx.conditions.desktop ? "+=70%" : "+=55%",
+          scrub: 0.3,
           pin: q(".invite__stage")[0],
           anticipatePin: 1,
         },
@@ -42,7 +42,7 @@ export function InvitationReveal() {
         .fromTo(q(".invite__card"), { scale: 0.9, opacity: 0.4 }, { scale: 1, opacity: 1, duration: 0.5, ease: EASE.soft }, 0.2)
         .fromTo(q(".invite__border"), { clipPath: "inset(50% 50% 50% 50%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.4, ease: EASE.inOut }, 0.35)
         .from(q(".invite__reveal"), { opacity: 0, y: 24, stagger: 0.07, duration: 0.25, ease: EASE.soft }, 0.5)
-        .to(el, { backgroundColor: "#e9dcc3", duration: 1 }, 0);
+        .to(el, { backgroundColor: "#4e1219", duration: 1 }, 0);
     });
 
     return () => mm.revert();

@@ -1,10 +1,11 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { CalendarPlus, Share2 } from "lucide-react";
-import { wedding, dottedDate, fullPlace, hasCeremonyTime, weddingDayEndsAt, weddingStartsAt, formatTime, longDate } from "../config/wedding";
+import { wedding, dottedDate, fullPlace, weddingDayEndsAt, weddingStartsAt, longDate } from "../config/wedding";
 import { useCountdown } from "../hooks/useCountdown";
 import { downloadIcs } from "../lib/calendar";
 import { shareInvitation, type ShareResult } from "../lib/share";
 import { CornerFlourish, Mandala } from "./ornaments/Ornaments";
+import { SkyLanterns } from "./v2/SkyLanterns";
 import { EASE, MQ, gsap } from "../lib/motion";
 
 const START = weddingStartsAt();
@@ -20,8 +21,9 @@ const UNITS = [
 const SHARE_MESSAGES: Record<ShareResult, string> = {
   shared: "Thank you for sharing the invitation.",
   copied: "Link copied — paste it anywhere to share.",
+  whatsapp: "Opening WhatsApp to share the invitation…",
   cancelled: "",
-  failed: "Couldn't copy automatically — please copy the address from your browser.",
+  failed: `Couldn't copy automatically — share this address: ${typeof window !== "undefined" ? window.location.href.split("#")[0] : ""}`,
 };
 
 function CountdownClock() {
@@ -71,34 +73,17 @@ export function WeddingCountdown() {
     const q = gsap.utils.selector(el);
     const mm = gsap.matchMedia();
 
-    mm.add({ desktop: "(min-width: 768px)", motion: MQ.motion }, (ctx) => {
-      if (!ctx.conditions?.motion) return;
-      if (!ctx.conditions.desktop) {
-        // phones: the burgundy curtain opens as the section scrolls in, without pinning
-        gsap.fromTo(q(".savedate__curtain"), { clipPath: "circle(12% at 50% 30%)" }, {
-          clipPath: "circle(150% at 50% 30%)",
-          ease: EASE.none,
-          scrollTrigger: { trigger: el, start: "top 90%", end: "top 15%", scrub: 0.5 },
-        });
-        gsap.from(q(".savedate__reveal"), { opacity: 0, y: 24, stagger: 0.1, duration: 1, ease: EASE.soft, scrollTrigger: { trigger: el, start: "top 45%" } });
-        return;
-      }
-      const tl = gsap.timeline({
-        defaults: { ease: EASE.none },
-        scrollTrigger: {
-          trigger: el,
-          start: "top top",
-          end: ctx.conditions.desktop ? "+=110%" : "+=70%",
-          scrub: 0.6,
-          pin: q(".savedate__stage")[0],
-          anticipatePin: 1,
-        },
-      });
-      tl.fromTo(q(".savedate__curtain"), { clipPath: "circle(6% at 50% 50%)" }, { clipPath: "circle(75% at 50% 50%)", duration: 0.5, ease: EASE.inOut }, 0)
-        .fromTo(q(".savedate__mandala"), { rotate: -30, scale: 0.7, opacity: 0 }, { rotate: 0, scale: 1, opacity: 1, duration: 0.7, ease: EASE.soft }, 0.1)
-        .fromTo(q(".savedate__frame .savedate__corner path"), { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.35, ease: EASE.inOut }, 0.35)
-        .from(q(".savedate__reveal"), { opacity: 0, y: 30, stagger: 0.05, duration: 0.2, ease: EASE.soft }, 0.4)
-        .from(q(".savedate__digit"), { yPercent: 100, opacity: 0, stagger: 0.025, duration: 0.2, ease: EASE.soft }, 0.45);
+    mm.add(MQ.motion, () => {
+      // a single timed reveal as the section arrives; the sky is always coloured
+      const tl = gsap.timeline({ defaults: { ease: EASE.soft }, scrollTrigger: { trigger: el, start: "top 65%", once: true } });
+      tl.fromTo(q(".savedate__mandala-wrap"), { scale: 0.55, rotate: -40, opacity: 0 }, { scale: 1, rotate: 0, opacity: 1, duration: 2.2 }, 0)
+        .from(q(".savedate__title"), { opacity: 0, y: 30, scale: 0.9, duration: 1.1 }, 0.2)
+        .from(q(".savedate__frame"), { opacity: 0, y: 40, scale: 0.94, duration: 1.1 }, 0.4)
+        .fromTo(q(".savedate__frame .savedate__corner path"), { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1.2, ease: EASE.inOut }, 0.7)
+        .from(q(".savedate__digit"), { yPercent: 110, opacity: 0, rotateX: -80, stagger: 0.06, duration: 0.8, ease: "back.out(1.7)" }, 0.8)
+        .from(q(".savedate__frame p:not(.savedate__date)"), { opacity: 0, y: 14, stagger: 0.12, duration: 0.8 }, 1.4)
+        .from(q(".countdown__unit"), { opacity: 0, y: 30, scale: 0.8, stagger: 0.1, duration: 0.9, ease: "back.out(1.6)" }, 1.6)
+        .from(q(".savedate__actions > *, .savedate__fineprint"), { opacity: 0, y: 20, stagger: 0.1, duration: 0.8 }, 2);
     });
 
     return () => mm.revert();
@@ -116,7 +101,10 @@ export function WeddingCountdown() {
       <div className="savedate__stage">
         <div className="savedate__curtain">
           <div className="savedate__brocade" aria-hidden />
-          <Mandala className="savedate__mandala" aria-hidden />
+          <SkyLanterns />
+          <div className="savedate__mandala-wrap" aria-hidden>
+            <Mandala className="savedate__mandala" />
+          </div>
 
           <div className="savedate__content">
             <h2 id="savedate-title" className="savedate__title display savedate__reveal" data-focus-target>
@@ -142,9 +130,6 @@ export function WeddingCountdown() {
                 {wedding.groom.toUpperCase()} <span>weds</span> {wedding.bride.toUpperCase()}
               </p>
               <p className="savedate__place">{fullPlace()}</p>
-              <p className="savedate__time label">
-                {hasCeremonyTime() ? `Ceremony at ${formatTime(wedding.ceremonyStart)} IST` : "Ceremony time to be announced"}
-              </p>
             </div>
 
             <div className="savedate__reveal">
@@ -160,10 +145,7 @@ export function WeddingCountdown() {
               </button>
             </div>
             <p className="savedate__fineprint savedate__reveal" aria-live="polite">
-              {shareMsg ||
-                (hasCeremonyTime()
-                  ? "The calendar file includes the ceremony time in India Standard Time."
-                  : "Until the ceremony time is confirmed, the calendar adds an all-day event.")}
+              {shareMsg || "Add the wedding day to your calendar."}
             </p>
           </div>
         </div>

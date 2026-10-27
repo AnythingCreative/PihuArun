@@ -7,10 +7,10 @@ import { SoundToggle } from "./SoundToggle";
 import { useScrolledPast } from "../hooks/useScrollProgress";
 
 export const NAV_LINKS = [
+  { id: "blessings", label: "Blessings" },
   { id: "story", label: "Our Story" },
   { id: "traditions", label: "Traditions" },
   { id: "wedding-day", label: "Wedding Day" },
-  { id: "gallery", label: "Gallery" },
   { id: "details", label: "Details" },
 ];
 

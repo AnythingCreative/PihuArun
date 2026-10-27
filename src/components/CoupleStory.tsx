@@ -60,6 +60,16 @@ export function CoupleStory() {
           .fromTo(fig.querySelectorAll(".portrait__arch path"), { strokeDashoffset: 1 }, { strokeDashoffset: 0, ease: EASE.inOut }, 0.1 * i);
       });
 
+      if (q(".print").length) gsap.from(q(".print"), {
+        opacity: 0,
+        y: 60,
+        rotate: 0,
+        stagger: 0.12,
+        duration: 1.1,
+        ease: EASE.soft,
+        scrollTrigger: { trigger: q(".prints")[0], start: "top 85%" },
+      });
+
       gsap.from(q(".couple__sub, .couple__divider"), {
         opacity: 0,
         y: 20,
@@ -96,6 +106,26 @@ export function CoupleStory() {
           />
           <Portrait className="portrait--bride" photo={assets.pratimaPortrait} initials={wedding.bride[0]} label={wedding.bride} />
         </div>
+
+        {assets.storyPrints.length > 0 && (
+          <div className="prints">
+            {assets.storyPrints.map((p, i) => (
+              <figure key={p.src} className="print" style={{ ["--tilt" as string]: `${[-4, 3, -2, 5, -3][i % 5]}deg` }}>
+                <img
+                  src={publicUrl(p.src)}
+                  srcSet={p.srcSet}
+                  sizes="(min-width: 1024px) 15rem, 40vw"
+                  width={p.width}
+                  height={p.height}
+                  alt={p.alt}
+                  loading="lazy"
+                  decoding="async"
+                  style={{ objectPosition: p.focus }}
+                />
+              </figure>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

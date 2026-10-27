@@ -4,11 +4,12 @@
 //
 // Needs network access to commons.wikimedia.org and upload.wikimedia.org.
 // Usage:  npm run photos            fetch every slot
+//         TITLE="File:x.jpg" npm run photos -- haldi   use that exact file
 //         npm run photos -- haldi   fetch one slot
 // Review public/photos/_review.jpg afterwards and re-run a slot (with
 // PICK=<n> to choose another candidate) if a photo isn't right.
 import { mkdirSync, writeFileSync, existsSync, readFileSync } from "node:fs";
-import { execFileSync } from "node:child_process";
+import sharp from "sharp";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
@@ -39,6 +40,8 @@ const SLOTS = {
   pheras: { q: "Hindu wedding pheras sacred fire", must: /phera|saptapadi|wedding|agni/i },
   marigold: { q: "Marigold garlands flower market India", must: /marigold|tagetes|garland|genda/i },
   temple: { q: "Kashi Vishwanath temple Varanasi", must: /temple|mandir|vishwanath/i, landscape: true },
+  kailash: { q: "Shiva Parvati Ganesha Kailas", must: /shiva|parvati|kailas/i },
+  garhwal: { q: "Shiv Parvati Garhwal painting", must: /shiv|parvati/i },
   diyas: { q: "Diwali diyas oil lamps", must: /diya|deepam|lamp|diwali/i },
 };
 
@@ -51,7 +54,17 @@ async function api(params) {
   return res.json();
 }
 
+/** Some authors put a whole licence note in the Artist field; keep it to a name. */
+const shortAuthor = (a) => (!a ? "Unknown author" : a.length <= 60 ? a : (a.match(/taken by ((?:[A-Z]\. |[^.,])+)/)?.[1] ?? a.slice(0, 57) + "…"));
 const strip = (html = "") => html.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+
+/** TITLE="File:…" npm run photos -- <slot> fetches that exact Commons file. */
+async function byTitle(title) {
+  const data = await api({ action: "query", titles: title, prop: "imageinfo", iiprop: "url|size|mime|extmetadata", iiurlwidth: "2560" });
+  return Object.values(data.query?.pages ?? {})
+    .map((p) => ({ title: p.title, ...p.imageinfo?.[0] }))
+    .filter((f) => f.url && OK_LICENSE.test(f.extmetadata?.LicenseShortName?.value ?? ""));
+}
 
 async function candidates(slot) {
   const { q, must, landscape } = SLOTS[slot];
@@ -74,18 +87,13 @@ async function candidates(slot) {
     .sort((a, b) => b.width * b.height - a.width * a.height);
 }
 
-function resize(src, base) {
-  execFileSync("python3", ["-I", "-c", `
-import sys
-from PIL import Image, ImageOps
-src, base = sys.argv[1], sys.argv[2]
-im = ImageOps.exif_transpose(Image.open(src)).convert("RGB")
-for w in [${WIDTHS.join(",")}]:
-    if w > im.width: continue
-    h = round(im.height * w / im.width)
-    im.resize((w, h), Image.LANCZOS).save(f"{base}-{w}.webp", "WEBP", quality=82, method=6)
-print(im.width, im.height)
-`, src, base]);
+async function resize(src, base) {
+  const img = sharp(src).rotate();
+  const { width } = await img.metadata();
+  for (const w of WIDTHS) {
+    if (w > width) continue;
+    await img.clone().resize({ width: w }).webp({ quality: 82, effort: 6 }).toFile(`${base}-${w}.webp`);
+  }
 }
 
 const manifestPath = path.join(root, "src", "data", "photos.json");
@@ -96,7 +104,7 @@ const pick = Number(process.env.PICK ?? 0);
 for (const slot of Object.keys(SLOTS)) {
   if (only.length && !only.includes(slot)) continue;
   try {
-    const list = await candidates(slot);
+    const list = process.env.TITLE ? await byTitle(process.env.TITLE) : await candidates(slot);
     const f = list[pick];
     if (!f) {
       console.warn(`- ${slot}: no suitable openly licensed photo found`);
@@ -105,7 +113,7 @@ for (const slot of Object.keys(SLOTS)) {
     const raw = path.join(rawDir, `${slot}.jpg`);
     const res = await fetch(f.thumburl ?? f.url, { headers: { "User-Agent": UA } });
     writeFileSync(raw, Buffer.from(await res.arrayBuffer()));
-    resize(raw, path.join(outDir, slot));
+    await resize(raw, path.join(outDir, slot));
     const tw = Math.min(f.thumbwidth ?? f.width, f.width);
     const th = Math.round((f.height * tw) / f.width);
     const meta = f.extmetadata ?? {};
@@ -115,7 +123,7 @@ for (const slot of Object.keys(SLOTS)) {
       width: tw,
       height: th,
       alt: strip(meta.ImageDescription?.value).slice(0, 200) || f.title.replace(/^File:|\.\w+$/g, ""),
-      credit: `${strip(meta.Artist?.value) || "Unknown author"} · ${meta.LicenseShortName?.value} · Wikimedia Commons`,
+      credit: `${shortAuthor(strip(meta.Artist?.value))} · ${meta.LicenseShortName?.value} · Wikimedia Commons`,
       source: f.descriptionurl,
     };
     console.log(`✓ ${slot}: ${f.title} (${f.width}×${f.height}, ${meta.LicenseShortName?.value}) — ${list.length} candidates`);
@@ -129,17 +137,10 @@ writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n");
 // contact sheet for a human check
 const shots = Object.keys(manifest).map((s) => path.join(outDir, `${s}-640.webp`)).filter(existsSync);
 if (shots.length) {
-  execFileSync("python3", ["-I", "-c", `
-import sys
-from PIL import Image
-files = sys.argv[2:]
-cols = 4; cw, ch = 480, 320
-rows = (len(files) + cols - 1) // cols
-sheet = Image.new("RGB", (cols * cw, rows * ch), "white")
-for i, f in enumerate(files):
-    im = Image.open(f).convert("RGB"); im.thumbnail((cw, ch))
-    sheet.paste(im, ((i % cols) * cw, (i // cols) * ch))
-sheet.save(sys.argv[1], quality=85)
-`, path.join(outDir, "_review.jpg"), ...shots]);
+  const cols = 4, cw = 480, ch = 320;
+  const tiles = await Promise.all(shots.map((f, i) =>
+    sharp(f).resize(cw, ch, { fit: "inside" }).toBuffer().then((input) => ({ input, left: (i % cols) * cw, top: Math.floor(i / cols) * ch }))));
+  await sharp({ create: { width: cols * cw, height: Math.ceil(shots.length / cols) * ch, channels: 3, background: "white" } })
+    .composite(tiles).jpeg({ quality: 85 }).toFile(path.join(outDir, "_review.jpg"));
 }
 console.log(`\nWrote ${path.relative(root, manifestPath)}. Review public/photos/_review.jpg, then npm run build.`);
