@@ -15,6 +15,7 @@ npm run dev        # http://localhost:5173
 npm run build      # type-check + production build into dist/
 npm run preview    # serve dist/ locally
 npm run qa         # browser QA against the build (screenshots in .qa/)
+npm run deploy     # rebuild and publish to https://anythingcreative.github.io/PihuArun/
 ```
 
 `dist/` is a static folder and can go on any static host (Netlify, Vercel,
