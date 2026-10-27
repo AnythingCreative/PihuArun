@@ -21,6 +21,22 @@ npm run qa         # browser QA against the build (screenshots in .qa/)
 GitHub Pages, Cloudflare Pages, S3). `base: "./"` makes it work from a
 sub-path too.
 
+## Hosting
+
+The site is a static build (`dist/`). This repository is ready for any of these:
+
+| Host | How | Private repo? |
+|---|---|---|
+| **Netlify** (recommended) | app.netlify.com → Add new site → Import from GitHub → pick this repo. `netlify.toml` sets everything. | Free |
+| **Vercel** | vercel.com → Add New Project → import this repo. `vercel.json` sets everything. | Free |
+| **Cloudflare Pages** | dash.cloudflare.com → Workers & Pages → Create → Pages → connect repo. Build command `npm run build`, output `dist`. | Free |
+| **GitHub Pages** | Settings → Pages → Source: **GitHub Actions**. `.github/workflows/deploy.yml` builds and publishes on every push to `main`. | Needs a public repo or GitHub Pro |
+
+The public address is detected at build time on all four (see `vite.config.ts`), so link previews on
+WhatsApp and social media get an absolute preview image, a canonical URL is added, and the
+calendar file and Share button use the real address. For a custom domain, set the build
+environment variable `SITE_URL=https://your-domain/`.
+
 ## Fill in the wedding details
 
 Everything lives in **`src/config/wedding.ts`**. Empty fields are shown
@@ -37,7 +53,7 @@ is invented.
 | `rsvpUrl` | Adds an RSVP button |
 | `wishesEmail` | Wishes form opens the guest's mail app addressed to this e-mail (otherwise: local preview, clearly marked "not sent") |
 | `musicUrl` | Plays this licensed file; without it the sound toggle plays a soft tanpura drone synthesised in the browser |
-| `siteUrl` | Used for sharing; also add a canonical link and absolute OG URLs in `index.html` |
+| `siteUrl` | Filled in automatically when hosted (see Hosting); used for sharing, the calendar file and link previews |
 
 ## Photographs
 

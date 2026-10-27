@@ -46,7 +46,7 @@ export interface WeddingConfig {
   /** Optional licensed music file (e.g. "music/shehnai.mp3" in /public). */
   musicUrl: string;
 
-  /** Final public URL of the site, once published. Used for canonical/share. */
+  /** Public URL of the site. Filled in automatically at build time on Netlify, Vercel, Cloudflare Pages and GitHub Pages (see vite.config.ts); set SITE_URL to override. */
   siteUrl: string;
 }
 
@@ -75,7 +75,7 @@ export const wedding: WeddingConfig = {
 
   musicUrl: "",
 
-  siteUrl: "",
+  siteUrl: import.meta.env.VITE_SITE_URL ?? "",
 };
 
 /** Fields that should be completed before the invitation is shared widely. */
