@@ -3,6 +3,7 @@ import { EASE, MQ, gsap } from "../../lib/motion";
 import { art, publicUrl, type Photo } from "../../data/assets";
 import { GoldFrame } from "./GoldFrame";
 import { SectionBackdrop } from "./SectionBackdrop";
+import { useT } from "../../lib/i18n";
 
 const ganesh = art("ganesh", "Shri Ganesh on a golden lotus throne, painted artwork");
 const shivParvati = art("shiv-parvati", "The divine wedding of Shiv and Parvati around the sacred fire, painted artwork");
@@ -25,6 +26,7 @@ import { LotusDivider } from "../ornaments/Ornaments";
  * palace wall; artwork slots will hold the AI-painted scenes.
  */
 export function Blessings() {
+  const t = useT();
   const root = useRef<HTMLElement>(null);
 
   useLayoutEffect(() => {
@@ -56,9 +58,9 @@ export function Blessings() {
       <div className="blessings__wall" aria-hidden />
       <SectionBackdrop slot="ghats-bg" className="backdrop--blessings" focus="30% 50%" />
       <div className="container blessings__inner">
-        <p className="label eyebrow blessings__eyebrow">With the blessings of</p>
+        <p className="label eyebrow blessings__eyebrow">{t("With the blessings of", "आशीर्वाद सहित")}</p>
         <h2 id="blessings-title" className="blessings__title">
-          Shri Ganesh <span>&amp;</span> Shiv Parvati
+          {t("Shri Ganesh", "श्री गणेश")} <span>&amp;</span> {t("Shiv Parvati", "शिव पार्वती")}
         </h2>
         <p className="blessings__shloka deva" lang="sa">
           <span>वक्रतुण्ड महाकाय</span> <span>सूर्यकोटि समप्रभ ।</span> <span>निर्विघ्नं कुरु मे देव</span> <span>सर्वकार्येषु सर्वदा ॥</span>
@@ -68,12 +70,19 @@ export function Blessings() {
         <div className={`blessings__paintings ${ganesh || shivParvati ? "has-art" : ""}`}>
           <Painting pic={ganesh} />
           <div className="blessings__story">
-            <h3>A flame that has burned since their wedding</h3>
+            <h3>{t("A flame that has burned since their wedding", "उनके विवाह से आज तक प्रज्वलित अग्नि")}</h3>
             <p>
-              High in the Himalayas, at the temple of Triyuginarayan, Shiv and Parvati are said to have married before a sacred fire, with
-              Vishnu giving the bride away. That fire, the akhand dhuni, is kept burning to this day.
+              {t(
+                "High in the Himalayas, at the temple of Triyuginarayan, Shiv and Parvati are said to have married before a sacred fire, with Vishnu giving the bride away. That fire, the akhand dhuni, is kept burning to this day.",
+                "हिमालय की ऊँचाइयों पर त्रियुगीनारायण मंदिर में, पवित्र अग्नि के समक्ष शिव और पार्वती का विवाह हुआ था और भगवान विष्णु ने कन्यादान किया था। वह अखंड धूनी आज भी प्रज्वलित है।",
+              )}
             </p>
-            <p>With their blessings, and with Ganesh ji to clear the path, we begin our own journey around the sacred fire.</p>
+            <p>
+              {t(
+                "With their blessings, and with Ganesh ji to clear the path, we begin our own journey around the sacred fire.",
+                "उन्हीं के आशीर्वाद से, और गणेश जी की कृपा से, हम भी पवित्र अग्नि के फेरे लेकर अपनी जीवन यात्रा आरंभ कर रहे हैं।",
+              )}
+            </p>
           </div>
           <Painting pic={shivParvati} />
         </div>

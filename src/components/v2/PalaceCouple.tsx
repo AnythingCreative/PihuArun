@@ -5,6 +5,7 @@ import { PalaceScene, cuspedArch } from "./PalaceScene";
 import { CoupleIllustration } from "./CoupleIllustration";
 import { GoldFrame } from "./GoldFrame";
 import { art, publicUrl } from "../../data/assets";
+import { useNames, useT } from "../../lib/i18n";
 
 const palaceArt = art("palace", "");
 const portrait = art("couple-portrait", `${wedding.groom} and ${wedding.bride} in wedding attire, painted portrait`, "50% 30%");
@@ -14,6 +15,8 @@ const portrait = art("couple-portrait", `${wedding.groom} and ${wedding.bride} i
  * illustrated couple beneath a lamp-lit colonnade, peacocks either side.
  */
 export function PalaceCouple() {
+  const t = useT();
+  const names = useNames();
   const root = useRef<HTMLElement>(null);
 
   useLayoutEffect(() => {
@@ -95,11 +98,11 @@ export function PalaceCouple() {
         <div className="palace-sec__curtain palace-sec__curtain--r" aria-hidden />
 
         <div className="palace-sec__text">
-          <p className="label eyebrow">Our story</p>
+          <p className="label eyebrow">{t("Our story", "हमारी कहानी")}</p>
           <h2 id="couple-title" className="couple__title palace-sec__title">
-            {wedding.groom} <span>&amp;</span> {wedding.bride}
+            {names.groom} <span>&amp;</span> {names.bride}
           </h2>
-          <p className="palace-sec__sub">Two journeys. One beautiful beginning.</p>
+          <p className="palace-sec__sub">{t("Two journeys. One beautiful beginning.", "दो राहें, एक सुंदर शुरुआत।")}</p>
         </div>
       </div>
     </section>

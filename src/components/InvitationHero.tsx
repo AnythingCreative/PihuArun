@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from "react";
 import { wedding, displayDate, place } from "../config/wedding";
 import { CornerFlourish, GaneshMotif, MarigoldPetal } from "./ornaments/Ornaments";
 import { KailashScene } from "./v2/KailashScene";
+import { useDateFormat, useNames, useT } from "../lib/i18n";
 
 import { art, publicUrl } from "../data/assets";
 
@@ -19,6 +20,9 @@ const PETALS = [
 ];
 
 export function InvitationHero() {
+  const t = useT();
+  const names = useNames();
+  const fmt = useDateFormat();
   const root = useRef<HTMLElement>(null);
 
   useLayoutEffect(() => {
@@ -113,36 +117,36 @@ export function InvitationHero() {
         <p className="hero__shloka deva" lang="sa">
           ॥ श्री गणेशाय नमः ॥
         </p>
-        <p className="hero__families">Together with our families</p>
+        <p className="hero__families">{t("Together with our families", "परिवारों के आशीर्वाद सहित")}</p>
 
         <h1 id="hero-title" className="hero__names display">
           <span className="hero__name hero__name--groom">
-            <span className="hero__name-inner">{wedding.groom.toUpperCase()}</span>
+            <span className="hero__name-inner">{names.groom.toUpperCase()}</span>
           </span>
-          <span className="hero__amp" aria-label="and">
+          <span className="hero__amp" aria-label={t("and", "और")}>
             &amp;
           </span>
           <span className="hero__name hero__name--bride">
-            <span className="hero__name-inner">{wedding.bride.toUpperCase()}</span>
+            <span className="hero__name-inner">{names.bride.toUpperCase()}</span>
           </span>
         </h1>
 
-        <p className="hero__invite label">Invite you to celebrate their wedding</p>
+        <p className="hero__invite label">{t("Invite you to celebrate their wedding", "आपको अपने विवाह समारोह में सादर आमंत्रित करते हैं")}</p>
         <p className="hero__date">
-          <time dateTime={wedding.date}>{displayDate()}</time>
+          <time dateTime={wedding.date}>{t(displayDate(), fmt(wedding.date, { day: "numeric", month: "long", year: "numeric" }))}</time>
         </p>
-        <p className="hero__place label">{place().toUpperCase()}</p>
+        <p className="hero__place label">{t(place().toUpperCase(), "प्रयागराज, उत्तर प्रदेश")}</p>
       </div>
 
       <a
-        href="#invitation"
+        href="#blessings"
         className="hero__scroll label"
         onClick={(e) => {
           e.preventDefault();
-          scrollToSection("invitation");
+          scrollToSection("blessings");
         }}
       >
-        <span>Scroll to begin</span>
+        <span>{t("Scroll to begin", "आगे देखें")}</span>
         <span className="hero__scroll-line" aria-hidden />
       </a>
     </section>

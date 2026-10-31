@@ -8,6 +8,8 @@ export interface Tradition {
   hindi: string;
   meaning: string;
   description: string;
+  /** Hindi version of the meaning, shown when the guest switches to हिंदी. */
+  meaningHi: string;
   art: TraditionArtKey;
   /** Photo slot from scripts/fetch-photos.mjs; used instead of the illustration once fetched. */
   photoSlot: string;
@@ -30,6 +32,7 @@ export const traditions: Tradition[] = [
       "Family and friends anoint the bride and groom with turmeric paste — a golden blessing of health, radiance and happiness, shared with laughter.",
     art: "haldi",
     photoSlot: "haldi",
+    meaningHi: "उल्लास, आनंद और शुभता",
     date: "2026-11-23",
   },
   {
@@ -41,6 +44,7 @@ export const traditions: Tradition[] = [
       "Intricate henna patterns bloom across the hands, drawn slowly and with care, as songs and music fill the gathering.",
     art: "mehendi",
     photoSlot: "mehendi",
+    meaningHi: "कला और उत्सव",
     date: "2026-11-23",
   },
   {
@@ -52,6 +56,7 @@ export const traditions: Tradition[] = [
       "The families meet in song: dholak beats, ghungroo and old wedding geet fill the night as everyone dances together before the big day.",
     art: "haldi",
     photoSlot: "marigold",
+    meaningHi: "संगीत, नृत्य और हँसी",
   },
   {
     id: "mandap",
@@ -62,6 +67,7 @@ export const traditions: Tradition[] = [
       "Beneath the mandap, before the sacred fire and in the presence of family, the couple make their vows and begin a shared life.",
     art: "mandap",
     photoSlot: "mandap",
+    meaningHi: "पवित्र मंडप",
     date: wedding.date,
   },
   {
@@ -73,6 +79,7 @@ export const traditions: Tradition[] = [
       "Tied together, the couple walk around Agni seven times; each circle is a promise to walk through life side by side.",
     art: "pheras",
     photoSlot: "pheras",
+    meaningHi: "सात वचन, एक जीवन यात्रा",
     date: wedding.date,
   },
 ];

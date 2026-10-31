@@ -1,22 +1,22 @@
 import { useId, useLayoutEffect, useRef, useState, type FormEvent } from "react";
-import { Copy, Mail, PenLine } from "lucide-react";
+import { MessageCircle, PenLine } from "lucide-react";
 import { wedding } from "../config/wedding";
 import { Lotus, Toran } from "./ornaments/Ornaments";
 import { EASE, MQ, gsap } from "../lib/motion";
+import { useNames, useT } from "../lib/i18n";
 
 const MAX_NAME = 60;
 const MAX_MESSAGE = 500;
 
-type Status =
-  | { kind: "idle" }
-  | { kind: "mail-opened" }
-  | { kind: "preview"; name: string; message: string; copied?: boolean };
+/** Blessings go to the first contact (Arun) on WhatsApp. */
+const RECIPIENT = wedding.contacts[0];
+
+type Status = { kind: "idle" } | { kind: "sent"; name: string; message: string; href: string };
 
 /**
- * Section 10 — blessings and wishes. The form is honest about what happens:
- * with `wishesEmail` configured it opens the guest's own mail app (nothing is
- * sent until they press Send); otherwise it shows a local preview and says
- * plainly that nothing was sent or saved.
+ * Section 10 — blessings and wishes. Writing a blessing opens WhatsApp with it
+ * already typed to Arun; it is sent when the guest presses Send there.
+ * Nothing is stored on the site.
  */
 export function GuestWishes() {
   const root = useRef<HTMLElement>(null);
@@ -25,7 +25,9 @@ export function GuestWishes() {
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState<{ name?: string; message?: string }>({});
   const [status, setStatus] = useState<Status>({ kind: "idle" });
-  const mailMode = Boolean(wedding.wishesEmail);
+  const t = useT();
+  const names = useNames();
+  const recipientName = t(RECIPIENT.name, RECIPIENT.nameHi);
 
   useLayoutEffect(() => {
     const el = root.current!;
@@ -53,31 +55,20 @@ export function GuestWishes() {
   const submit = (e: FormEvent) => {
     e.preventDefault();
     const next: typeof errors = {};
-    if (!name.trim()) next.name = "Please add your name.";
-    if (!message.trim()) next.message = "Please write a short message.";
+    if (!name.trim()) next.name = t("Please add your name.", "कृपया अपना नाम लिखें।");
+    if (!message.trim()) next.message = t("Please write a short message.", "कृपया एक छोटा-सा संदेश लिखें।");
     setErrors(next);
     if (next.name || next.message) {
       document.getElementById(next.name ? `${uid}-name` : `${uid}-msg`)?.focus();
       return;
     }
-    if (mailMode) {
-      const subject = `Wishes for ${wedding.groom} & ${wedding.bride}`;
-      const body = `${message.trim()}\n\n— ${name.trim()}`;
-      window.location.href = `mailto:${wedding.wishesEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      setStatus({ kind: "mail-opened" });
-    } else {
-      setStatus({ kind: "preview", name: name.trim(), message: message.trim() });
-    }
-  };
-
-  const copyWish = async () => {
-    if (status.kind !== "preview") return;
-    try {
-      await navigator.clipboard.writeText(`${status.message}\n\n— ${status.name}`);
-      setStatus({ ...status, copied: true });
-    } catch {
-      /* clipboard unavailable: the text stays visible to copy by hand */
-    }
+    const text = t(
+      `🙏 Blessings for ${wedding.groom} & ${wedding.bride}\n\n${message.trim()}\n\n— ${name.trim()}`,
+      `🙏 ${names.groom} और ${names.bride} के लिए शुभकामनाएँ\n\n${message.trim()}\n\n— ${name.trim()}`,
+    );
+    const href = `https://wa.me/91${RECIPIENT.phone}?text=${encodeURIComponent(text)}`;
+    window.open(href, "_blank", "noopener");
+    setStatus({ kind: "sent", name: name.trim(), message: message.trim(), href });
   };
 
   return (
@@ -86,18 +77,21 @@ export function GuestWishes() {
       <div className="container wishes__inner">
         <Lotus className="wishes__lotus" aria-hidden />
         <h2 id="wishes-title" className="h2 wishes__reveal">
-          Your Presence Is Our Present
+          {t("Your Presence Is Our Present", "आपकी उपस्थिति ही हमारा उपहार है")}
         </h2>
         <p className="lead wishes__lead wishes__reveal">
-          Your love, blessings, and good wishes will make this celebration even more meaningful.
+          {t(
+            "Your love, blessings, and good wishes will make this celebration even more meaningful.",
+            "आपका स्नेह, आशीर्वाद और शुभकामनाएँ इस उत्सव को और भी सार्थक बना देंगी।",
+          )}
         </p>
 
         <form className="wishes__form wishes__reveal" onSubmit={submit} noValidate>
           <p className="wishes__form-title label">
-            <PenLine aria-hidden /> Leave a blessing
+            <PenLine aria-hidden /> {t("Leave a blessing", "आशीर्वाद भेजें")}
           </p>
           <div className="field">
-            <label htmlFor={`${uid}-name`}>Your name</label>
+            <label htmlFor={`${uid}-name`}>{t("Your name", "आपका नाम")}</label>
             <input
               id={`${uid}-name`}
               name="name"
@@ -115,7 +109,7 @@ export function GuestWishes() {
             )}
           </div>
           <div className="field">
-            <label htmlFor={`${uid}-msg`}>Your message</label>
+            <label htmlFor={`${uid}-msg`}>{t("Your blessing", "आपका आशीर्वाद")}</label>
             <textarea
               id={`${uid}-msg`}
               name="message"
@@ -135,38 +129,31 @@ export function GuestWishes() {
               </p>
             )}
           </div>
-          <button type="submit" className="btn">
-            {mailMode ? (
-              <>
-                <Mail aria-hidden /> Send via email
-              </>
-            ) : (
-              <>
-                <PenLine aria-hidden /> Preview my wish
-              </>
-            )}
+          <button type="submit" className="btn wishes__send">
+            <MessageCircle aria-hidden /> {t(`Send to ${recipientName} on WhatsApp`, `WhatsApp पर ${recipientName} को भेजें`)}
           </button>
           <p className="wishes__honest">
-            {mailMode
-              ? "This opens your own email app with the message ready; it is sent only when you press Send there."
-              : "Wishes aren't being collected online yet: your message stays on this device and is not sent or saved."}
+            {t(
+              "This opens WhatsApp with your blessing ready; it is sent when you press Send there.",
+              "इससे WhatsApp में आपका संदेश तैयार खुलेगा; वहाँ Send दबाने पर ही भेजा जाएगा।",
+            )}
           </p>
 
           <div className="wishes__status" aria-live="polite">
-            {status.kind === "mail-opened" && (
-              <p>Your email app should now be open with your message. If nothing happened, please write to {wedding.wishesEmail}.</p>
-            )}
-            {status.kind === "preview" && (
+            {status.kind === "sent" && (
               <div className="wish-card">
-                <p className="wish-card__label label">Preview — not sent</p>
+                <p className="wish-card__label label">{t("Opening WhatsApp", "WhatsApp खुल रहा है")}</p>
                 <blockquote>
                   <p>{status.message}</p>
                   <footer>— {status.name}</footer>
                 </blockquote>
-                <button type="button" className="btn btn--ghost" onClick={copyWish}>
-                  <Copy aria-hidden /> {status.copied ? "Copied" : "Copy my wish"}
-                </button>
-                <p className="wishes__honest">You can paste it into a message to the families.</p>
+                <p className="wishes__honest">
+                  {t("If WhatsApp didn't open, ", "अगर WhatsApp नहीं खुला, तो ")}
+                  <a href={status.href} target="_blank" rel="noopener noreferrer">
+                    {t("tap here to send it", "भेजने के लिए यहाँ छूएँ")}
+                  </a>
+                  .
+                </p>
               </div>
             )}
           </div>

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { wedding } from "../../config/wedding";
 import { GaneshMotif } from "../ornaments/Ornaments";
 import { ScrollTrigger } from "../../lib/motion";
 import { art, publicUrl } from "../../data/assets";
+import { useNames, useT } from "../../lib/i18n";
 
 /** Painted carved doors (public/art/doors.jpg) replace the drawn leaves once supplied. */
 const doorsArt = art("doors", "");
@@ -78,6 +78,8 @@ export function TempleGate() {
     window.dispatchEvent(new Event("gate:open"));
   }, [state]);
   const btn = useRef<HTMLButtonElement>(null);
+  const t = useT();
+  const names = useNames();
 
   useEffect(() => {
     if (state !== "closed") return;
@@ -120,7 +122,7 @@ export function TempleGate() {
   if (state === "open") return null;
 
   return (
-    <div className={`gate ${doorsArt ? "gate--art" : ""} ${state === "opening" ? "is-opening" : ""}`} role="dialog" aria-modal="false" aria-label="Wedding invitation — open the doors">
+    <div className={`gate ${doorsArt ? "gate--art" : ""} ${state === "opening" ? "is-opening" : ""}`} role="dialog" aria-modal="false" aria-label={t("Wedding invitation — open the doors", "विवाह निमंत्रण — द्वार खोलें")}>
       {doorsArt && <div className="gate__backdrop" aria-hidden style={{ backgroundImage: `url(${publicUrl(doorsArt.src)})` }} />}
       <div className="gate__glow" aria-hidden />
       <div className="gate__doors">
@@ -148,12 +150,12 @@ export function TempleGate() {
         <GaneshMotif className="gate__ganesh" title="Shri Ganesh" />
         <p className="gate__shloka deva" lang="sa">॥ श्री गणेशाय नमः ॥</p>
         <p className="gate__names">
-          {wedding.groom} <span>&amp;</span> {wedding.bride}
+          {names.groom} <span>&amp;</span> {names.bride}
         </p>
         <button ref={btn} type="button" className="gate__open" onClick={() => setState("opening")} autoFocus>
-          Open the doors
+          {t("Open the doors", "द्वार खोलें")}
         </button>
-        <p className="gate__hint">tap · scroll · or press Enter</p>
+        <p className="gate__hint">{t("tap · scroll · or press Enter", "छूएँ · स्क्रॉल करें · या Enter दबाएँ")}</p>
       </div>
     </div>
   );

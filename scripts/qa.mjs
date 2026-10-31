@@ -111,15 +111,17 @@ async function tour({ page, label }, steps) {
   const broken = await page.evaluate(() => [...document.images].filter((i) => i.complete && i.naturalWidth === 0).map((i) => i.src));
   check("no broken images (loaded so far)", broken.length === 0, broken.join(", "));
 
-  // wishes form honesty
+  // wishes go to Arun on WhatsApp
   await page.locator("#wishes").scrollIntoViewIfNeeded();
-  await page.click("text=Preview my wish");
+  await page.click(".wishes__send");
   check("wishes: validation", (await page.locator(".field__error").count()) === 2);
   await page.fill("#wishes input", "Meera");
   await page.fill("#wishes textarea", "Wishing you a lifetime of love and laughter.");
-  await page.click("text=Preview my wish");
-  const status = await page.locator(".wish-card").innerText();
-  check("wishes: honest local preview", status.toLowerCase().includes("preview — not sent") && status.includes("Meera"));
+  const [popup] = await Promise.all([page.waitForEvent("popup").catch(() => null), page.click(".wishes__send")]);
+  const waUrl = popup ? popup.url() : "";
+  await popup?.close().catch(() => {});
+  const waHref = await page.locator(".wish-card a").getAttribute("href");
+  check("wishes: opens WhatsApp to Arun with the blessing", (waHref ?? "").startsWith("https://wa.me/917905370013?text=") && decodeURIComponent(waHref).includes("Meera"), waUrl.slice(0, 60));
   await page.locator(".wishes__form").screenshot({ path: path.join(outDir, "desktop-wishes.png") });
 
   // venue: name, directions link and map, and no ceremony time anywhere

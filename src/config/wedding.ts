@@ -16,6 +16,10 @@ export interface WeddingContact {
   phone: string;
   /** The message WhatsApp opens with, ready for the guest to send. */
   whatsappText: string;
+  /** Hindi versions, used when the guest switches to हिंदी. */
+  nameHi: string;
+  roleHi: string;
+  whatsappTextHi: string;
 }
 
 export interface WeddingConfig {
@@ -89,12 +93,18 @@ export const wedding: WeddingConfig = {
       role: "For anything about the wedding",
       phone: "7905370013",
       whatsappText: "Namaste Arun! I received your wedding invitation for 24 November.",
+      nameHi: "अरुण",
+      roleHi: "विवाह से जुड़ी किसी भी जानकारी के लिए",
+      whatsappTextHi: "नमस्ते अरुण! मुझे 24 नवंबर के विवाह का निमंत्रण मिल गया है।",
     },
     {
       name: "Kundan",
       role: "For directions to Shivaya Vatika",
       phone: "6306403023",
       whatsappText: "Namaste Kundan ji, I need directions to Shivaya Vatika for Arun & Pratima's wedding.",
+      nameHi: "कुंदन",
+      roleHi: "शिवाय वाटिका का रास्ता जानने के लिए",
+      whatsappTextHi: "नमस्ते कुंदन जी, अरुण और प्रतिमा के विवाह के लिए शिवाय वाटिका का रास्ता बताइए।",
     },
   ],
   wishesEmail: "",

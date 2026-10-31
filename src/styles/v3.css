@@ -254,3 +254,68 @@
 .contact__btn--call { background: #9b0f2a; color: #fff3d6; }
 .contact__btn--wa { background: #1fa855; color: #fff; }
 @media (max-width: 560px) { .contacts { grid-template-columns: 1fr; } }
+
+/* ---------- हिंदी mode: Devanagari fonts, no wide tracking (it breaks conjuncts) ---------- */
+.lang-toggle { width: auto; min-width: 44px; padding: 0 0.7rem; font-family: "Tiro Devanagari Hindi", var(--font-sans); font-size: 0.95rem; font-weight: 600; line-height: 1; }
+.lang-toggle:lang(en) { font-family: var(--font-sans); font-size: 0.78rem; letter-spacing: 0.08em; }
+html[lang="hi"] {
+  --font-display: "Yatra One", "Tiro Devanagari Hindi", "Noto Serif Devanagari", serif;
+  --font-script: "Tiro Devanagari Hindi", "Noto Serif Devanagari", serif;
+  --font-serif: "Tiro Devanagari Hindi", "Noto Serif Devanagari", serif;
+}
+html[lang="hi"] body { font-family: "Tiro Devanagari Hindi", "Noto Serif Devanagari", serif; }
+html[lang="hi"] .label,
+html[lang="hi"] .eyebrow,
+html[lang="hi"] .label.eyebrow,
+html[lang="hi"] .site-nav a,
+html[lang="hi"] .gate__hint,
+html[lang="hi"] .gate__open,
+html[lang="hi"] .ritual__date,
+html[lang="hi"] .byday__daynum,
+html[lang="hi"] .contact__btn,
+html[lang="hi"] .details__directions,
+html[lang="hi"] .btn,
+html[lang="hi"] .countdown__label,
+html[lang="hi"] .savedate__weds,
+html[lang="hi"] .closing__date,
+html[lang="hi"] .hero__invite,
+html[lang="hi"] .hero__place,
+html[lang="hi"] .hero__date { letter-spacing: 0.02em; font-family: "Tiro Devanagari Hindi", "Noto Serif Devanagari", serif; text-transform: none; }
+html[lang="hi"] .hero__names,
+html[lang="hi"] .closing__names,
+html[lang="hi"] .palace-sec__title,
+html[lang="hi"] .gate__names,
+html[lang="hi"] .blessings__title,
+html[lang="hi"] .byday__name,
+html[lang="hi"] .h2,
+html[lang="hi"] .details__date,
+html[lang="hi"] .contact__name { letter-spacing: 0; line-height: 1.35; }
+html[lang="hi"] .hero__names { line-height: 1.2; }
+html[lang="hi"] .hero__invite, html[lang="hi"] .hero__place { font-size: 1.05rem; }
+html[lang="hi"] .details__title { letter-spacing: 0.04em; font-size: 1.2rem; }
+
+/* ---------- Closing: diyas sit above the buttons; names shower petals ---------- */
+.closing__diyas { margin: 1.4rem 0 0.4rem; }
+.closing__names { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.shower-petal {
+  position: absolute;
+  z-index: 5;
+  width: 12px;
+  height: 17px;
+  margin: -8px 0 0 -6px;
+  border-radius: 60% 40% 60% 40%;
+  pointer-events: none;
+  will-change: transform, opacity;
+  box-shadow: inset -2px -3px 0 rgb(0 0 0 / 0.12);
+}
+.closing:has(.backdrop--closing) .closing__diyas { display: none; }
+
+/* ---------- Large phone text (accessibility font sizes): keep the date card inside the screen ---------- */
+.savedate__frame { box-sizing: border-box; width: 100%; max-width: 36rem; }
+.savedate__date { font-size: min(clamp(2.6rem, 1.6rem + 5vw, 6rem), 12.5vw); }
+.savedate__weds { font-size: min(0.82rem, 3.6vw); letter-spacing: min(0.32em, 1.2vw); }
+.countdown__units { gap: min(0.8rem, 2vw); }
+.countdown__unit { min-width: 0; padding-inline: 0.2rem; }
+.countdown__value { font-size: min(clamp(2rem, 1.4rem + 3vw, 3.6rem), 9vw); }
+.countdown__label { font-size: min(0.7rem, 2.7vw); letter-spacing: min(0.2em, 0.6vw); }
+.contact__btn { font-size: min(0.78rem, 3.4vw); }

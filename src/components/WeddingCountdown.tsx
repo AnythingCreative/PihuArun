@@ -7,42 +7,47 @@ import { shareInvitation, type ShareResult } from "../lib/share";
 import { CornerFlourish, Mandala } from "./ornaments/Ornaments";
 import { SkyLanterns } from "./v2/SkyLanterns";
 import { EASE, MQ, gsap } from "../lib/motion";
+import { useNames, useT } from "../lib/i18n";
 
 const START = weddingStartsAt();
 const DAY_END = weddingDayEndsAt();
 
 const UNITS = [
-  { key: "days", label: "Days" },
-  { key: "hours", label: "Hours" },
-  { key: "minutes", label: "Minutes" },
-  { key: "seconds", label: "Seconds" },
+  { key: "days", label: "Days", hi: "दिन" },
+  { key: "hours", label: "Hours", hi: "घंटे" },
+  { key: "minutes", label: "Minutes", hi: "मिनट" },
+  { key: "seconds", label: "Seconds", hi: "सेकंड" },
 ] as const;
 
-const SHARE_MESSAGES: Record<ShareResult, string> = {
-  shared: "Thank you for sharing the invitation.",
-  copied: "Link copied — paste it anywhere to share.",
-  whatsapp: "Opening WhatsApp to share the invitation…",
-  cancelled: "",
-  failed: `Couldn't copy automatically — share this address: ${typeof window !== "undefined" ? window.location.href.split("#")[0] : ""}`,
+const SHARE_MESSAGES: Record<ShareResult, [string, string]> = {
+  shared: ["Thank you for sharing the invitation.", "निमंत्रण साझा करने के लिए धन्यवाद।"],
+  copied: ["Link copied — paste it anywhere to share.", "लिंक कॉपी हो गया — कहीं भी पेस्ट करके साझा करें।"],
+  whatsapp: ["Opening WhatsApp to share the invitation…", "निमंत्रण साझा करने के लिए WhatsApp खुल रहा है…"],
+  cancelled: ["", ""],
+  failed: [
+    `Couldn't copy automatically — share this address: ${typeof window !== "undefined" ? window.location.href.split("#")[0] : ""}`,
+    `अपने-आप कॉपी नहीं हुआ — यह पता साझा करें: ${typeof window !== "undefined" ? window.location.href.split("#")[0] : ""}`,
+  ],
 };
 
 function CountdownClock() {
   const c = useCountdown(START, DAY_END);
+  const t = useT();
   const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? "" : "s"}`;
 
   if (c.phase === "today") {
     return (
       <div className="countdown countdown--today" role="status">
-        <p className="countdown__celebrate display">Today is the day</p>
-        <p className="label">The wedding celebrations have begun · शुभ विवाह</p>
+        <p className="countdown__celebrate display">{t("Today is the day", "आज शुभ दिन है")}</p>
+        <p className="label">{t("The wedding celebrations have begun · शुभ विवाह", "विवाह उत्सव आरंभ हो गया है · शुभ विवाह")}</p>
       </div>
     );
   }
   if (c.phase === "after") {
     return (
       <div className="countdown countdown--after" role="status">
-        <p className="countdown__celebrate display">Happily married</p>
-        <p className="label">Thank you for your love and blessings</p>
+        <p className="countdown__celebrate display">{t("Happily married", "शुभ विवाह संपन्न")}</p>
+        <p className="label">{t("Thank you for your love and blessings", "आपके प्रेम और आशीर्वाद के लिए धन्यवाद")}</p>
       </div>
     );
   }
@@ -55,7 +60,7 @@ function CountdownClock() {
         {UNITS.map((u) => (
           <li key={u.key} className="countdown__unit">
             <span className="countdown__value">{String(c[u.key]).padStart(2, "0")}</span>
-            <span className="countdown__label label">{u.label}</span>
+            <span className="countdown__label label">{t(u.label, u.hi)}</span>
           </li>
         ))}
       </ol>
@@ -65,6 +70,8 @@ function CountdownClock() {
 
 /** Section 07 — the wedding day reveal: a burgundy curtain opens on the date. */
 export function WeddingCountdown() {
+  const t = useT();
+  const names = useNames();
   const root = useRef<HTMLElement>(null);
   const [shareMsg, setShareMsg] = useState("");
 
@@ -91,7 +98,7 @@ export function WeddingCountdown() {
 
   const onShare = async () => {
     const result = await shareInvitation();
-    setShareMsg(SHARE_MESSAGES[result]);
+    setShareMsg(t(...SHARE_MESSAGES[result]));
   };
 
   const date = dottedDate();
@@ -108,7 +115,7 @@ export function WeddingCountdown() {
 
           <div className="savedate__content">
             <h2 id="savedate-title" className="savedate__title display savedate__reveal" data-focus-target>
-              Save the Date
+              {t("Save the Date", "तिथि याद रखें")}
             </h2>
 
             <div className="savedate__frame savedate__reveal">
@@ -127,9 +134,9 @@ export function WeddingCountdown() {
                 </time>
               </p>
               <p className="savedate__weds label">
-                {wedding.groom.toUpperCase()} <span>weds</span> {wedding.bride.toUpperCase()}
+                {names.groom.toUpperCase()} <span>{t("weds", "संग")}</span> {names.bride.toUpperCase()}
               </p>
-              <p className="savedate__place">{fullPlace()}</p>
+              <p className="savedate__place">{t(fullPlace(), "प्रयागराज, उत्तर प्रदेश, भारत")}</p>
             </div>
 
             <div className="savedate__reveal">
@@ -138,14 +145,14 @@ export function WeddingCountdown() {
 
             <div className="savedate__actions savedate__reveal">
               <button type="button" className="btn btn--gold" onClick={downloadIcs}>
-                <CalendarPlus aria-hidden /> Add to Calendar
+                <CalendarPlus aria-hidden /> {t("Add to Calendar", "कैलेंडर में जोड़ें")}
               </button>
               <button type="button" className="btn btn--ghost-light" onClick={onShare}>
-                <Share2 aria-hidden /> Share Invitation
+                <Share2 aria-hidden /> {t("Share Invitation", "निमंत्रण साझा करें")}
               </button>
             </div>
             <p className="savedate__fineprint savedate__reveal" aria-live="polite">
-              {shareMsg || "Add the wedding day to your calendar."}
+              {shareMsg || t("Add the wedding day to your calendar.", "विवाह की तिथि अपने कैलेंडर में जोड़ें।")}
             </p>
           </div>
         </div>

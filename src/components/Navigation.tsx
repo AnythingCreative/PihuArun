@@ -5,16 +5,19 @@ import { scrollToSection } from "../lib/scrollTo";
 import { ScrollProgress } from "./ScrollProgress";
 import { SoundToggle } from "./SoundToggle";
 import { useScrolledPast } from "../hooks/useScrollProgress";
+import { LangToggle } from "./v2/LangToggle";
+import { useT } from "../lib/i18n";
 
 export const NAV_LINKS = [
-  { id: "blessings", label: "Blessings" },
-  { id: "story", label: "Our Story" },
-  { id: "traditions", label: "Traditions" },
-  { id: "wedding-day", label: "Wedding Day" },
-  { id: "details", label: "Details" },
+  { id: "blessings", label: "Blessings", hi: "आशीर्वाद" },
+  { id: "story", label: "Our Story", hi: "हमारी कहानी" },
+  { id: "traditions", label: "Traditions", hi: "रस्में" },
+  { id: "wedding-day", label: "Wedding Day", hi: "विवाह दिवस" },
+  { id: "details", label: "Details", hi: "स्थान" },
 ];
 
 export function Navigation() {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const scrolled = useScrolledPast(40);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -59,7 +62,7 @@ export function Navigation() {
             {NAV_LINKS.map((l) => (
               <li key={l.id}>
                 <a href={`#${l.id}`} onClick={go(l.id)}>
-                  {l.label}
+                  {t(l.label, l.hi)}
                 </a>
               </li>
             ))}
@@ -67,6 +70,7 @@ export function Navigation() {
         </nav>
 
         <div className="site-header__tools">
+          <LangToggle />
           <SoundToggle />
           <button
             ref={toggleRef}
@@ -74,7 +78,7 @@ export function Navigation() {
             className="icon-btn menu-toggle"
             aria-expanded={open}
             aria-controls="mobile-menu"
-            aria-label={open ? "Close menu" : "Open menu"}
+            aria-label={open ? t("Close menu", "मेनू बंद करें") : t("Open menu", "मेनू खोलें")}
             onClick={() => setOpen((o) => !o)}
           >
             {open ? <X aria-hidden /> : <Menu aria-hidden />}
@@ -85,10 +89,10 @@ export function Navigation() {
       <div id="mobile-menu" ref={menuRef} className="mobile-menu" hidden={!open}>
         <nav aria-label="Sections (menu)">
           <ul>
-            {[{ id: "top", label: "Beginning" }, ...NAV_LINKS].map((l, i) => (
+            {[{ id: "top", label: "Beginning", hi: "शुरुआत" }, ...NAV_LINKS].map((l, i) => (
               <li key={l.id} style={{ ["--i" as string]: i }}>
                 <a href={`#${l.id}`} onClick={go(l.id)}>
-                  {l.label}
+                  {t(l.label, l.hi)}
                 </a>
               </li>
             ))}
