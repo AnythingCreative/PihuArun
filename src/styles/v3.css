@@ -420,3 +420,22 @@ html.gate-locked .varmala { opacity: 0; }
   will-change: transform, opacity;
 }
 @media (prefers-reduced-motion: reduce) { .closing__glow { opacity: 0.6; } }
+
+/* ---------- Blessings: one gilt frame that cross-fades between the two paintings ---------- */
+.blessings__paintings.has-cycle { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); max-width: 60rem; margin-inline: auto; align-items: center; text-align: left; }
+.painting--cycle { rotate: 0deg !important; margin: 0; }
+.painting__switch { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.painting__stack { position: relative; display: block; aspect-ratio: 3 / 4; overflow: hidden; }
+.painting__stack img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scale(1.06); transition: opacity 1.4s ease, transform 6s ease-out; will-change: opacity, transform; }
+.painting__stack img.is-shown { opacity: 1; transform: scale(1); }
+.painting__caption { margin-top: 0.8rem; display: flex; flex-direction: column; align-items: center; gap: 0.45rem; font-family: var(--font-script); font-size: clamp(1.15rem, 1rem + 0.5vw, 1.45rem); color: var(--gold-soft); text-align: center; min-height: 3.2em; }
+.painting__dots { display: flex; gap: 6px; }
+.painting__dots i { width: 7px; height: 7px; border-radius: 50%; background: rgb(246 210 122 / 0.35); transition: width 0.4s, background 0.4s; }
+.painting__dots i.is-on { width: 20px; border-radius: 4px; background: var(--gold-soft); }
+/* phones and tablets: a smaller frame above the story, not a full-width painting */
+@media (max-width: 1023.98px) {
+  .blessings__paintings.has-cycle { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  .painting--cycle { width: min(58vw, 15rem); }
+}
+@media (prefers-reduced-motion: reduce) { .painting__stack img { transition: none; } }
+@media (max-width: 1023.98px) { .blessings__paintings.has-cycle .blessings__story { order: 0; } }
