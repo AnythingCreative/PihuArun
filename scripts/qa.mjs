@@ -130,12 +130,13 @@ async function tour({ page, label }, steps) {
   check("venue, directions and map shown", details.includes("Shivaya Vatika") && dirHref?.startsWith("https://www.google.com/maps/dir/?api=1&destination=Shivaya") && (await page.locator("#details iframe").count()) === 1, dirHref ?? "");
   check("no ceremony time shown", !/to be announced|ceremony time/i.test(await page.evaluate(() => document.body.innerText)));
 
-  // sound toggle
+  // music is on by default after opening the doors; the toggle mutes and unmutes it
+  check("music on by default", (await page.getAttribute(".sound-toggle", "aria-pressed")) === "true");
+  await page.click(".sound-toggle");
+  check("sound toggle turns off", (await page.getAttribute(".sound-toggle", "aria-pressed")) === "false");
   await page.click(".sound-toggle");
   await page.waitForTimeout(800);
   check("sound toggle turns on", (await page.getAttribute(".sound-toggle", "aria-pressed")) === "true");
-  await page.click(".sound-toggle");
-  check("sound toggle turns off", (await page.getAttribute(".sound-toggle", "aria-pressed")) === "false");
 
   // back to top
   await page.click(".back-to-top");

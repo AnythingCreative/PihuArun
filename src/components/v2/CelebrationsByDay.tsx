@@ -3,6 +3,7 @@ import { traditions, type Tradition } from "../../data/traditions";
 import { TraditionArt } from "../scenes/TraditionArt";
 import { art, photo, publicUrl } from "../../data/assets";
 import { EASE, MQ, gsap } from "../../lib/motion";
+import { SectionToran } from "./SectionToran";
 import { useDateFormat, useLang, useT } from "../../lib/i18n";
 
 /** AI-painted ritual cards (public/art/) take over from the photos once supplied. */
@@ -52,6 +53,7 @@ export function CelebrationsByDay() {
 
   return (
     <section id="traditions" ref={root} className="traditions byday" aria-labelledby="traditions-title">
+      <SectionToran />
       <header className="byday__head">
         <p className="label eyebrow">{t("Sacred rituals", "पवित्र रस्में")}</p>
         <h2 id="traditions-title" className="h2" data-focus-target>

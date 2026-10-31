@@ -19,6 +19,7 @@ function Painting({ pic }: { pic: Photo | null }) {
   );
 }
 import { LotusDivider } from "../ornaments/Ornaments";
+import { SectionToran } from "./SectionToran";
 
 /**
  * Blessings — Ganesh vandana, then Shiv and Parvati, whose wedding at
@@ -57,6 +58,7 @@ export function Blessings() {
     <section id="blessings" ref={root} className="blessings" aria-labelledby="blessings-title">
       <div className="blessings__wall" aria-hidden />
       <SectionBackdrop slot="ghats-bg" className="backdrop--blessings" focus="30% 50%" />
+      <SectionToran />
       <div className="container blessings__inner">
         <p className="label eyebrow blessings__eyebrow">{t("With the blessings of", "आशीर्वाद सहित")}</p>
         <h2 id="blessings-title" className="blessings__title">

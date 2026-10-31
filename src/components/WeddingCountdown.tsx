@@ -7,6 +7,7 @@ import { shareInvitation, type ShareResult } from "../lib/share";
 import { CornerFlourish, Mandala } from "./ornaments/Ornaments";
 import { SkyLanterns } from "./v2/SkyLanterns";
 import { EASE, MQ, gsap } from "../lib/motion";
+import { SectionToran } from "./v2/SectionToran";
 import { useNames, useT } from "../lib/i18n";
 
 const START = weddingStartsAt();
@@ -105,6 +106,7 @@ export function WeddingCountdown() {
 
   return (
     <section id="wedding-day" ref={root} className="savedate on-dark" aria-labelledby="savedate-title">
+      <SectionToran />
       <div className="savedate__stage">
         <div className="savedate__curtain">
           <div className="savedate__brocade" aria-hidden />

@@ -3,6 +3,7 @@ import { GaneshMotif } from "../ornaments/Ornaments";
 import { ScrollTrigger } from "../../lib/motion";
 import { art, publicUrl } from "../../data/assets";
 import { useNames, useT } from "../../lib/i18n";
+import { autoStartSound } from "../../lib/sound";
 
 /** Painted carved doors (public/art/doors.jpg) replace the drawn leaves once supplied. */
 const doorsArt = art("doors", "");
@@ -74,6 +75,7 @@ export function TempleGate() {
   // skipped doors still count as opened, so the hero's entrance and other listeners behave the same
   useEffect(() => {
     if (state !== "open" || document.documentElement.classList.contains("gate-opened")) return;
+    autoStartSound();
     document.documentElement.classList.add("gate-opened");
     window.dispatchEvent(new Event("gate:open"));
   }, [state]);
@@ -88,7 +90,10 @@ export function TempleGate() {
     // the invitation always begins at the doors, even after a reload mid-page
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
     window.scrollTo(0, 0);
-    const open = () => setState("opening");
+    const open = () => {
+      autoStartSound();
+      setState("opening");
+    };
     const onKey = (e: KeyboardEvent) => {
       if (["Enter", " ", "ArrowDown", "PageDown", "Escape"].includes(e.key)) open();
     };
@@ -152,7 +157,12 @@ export function TempleGate() {
         <p className="gate__names">
           {names.groom} <span>&amp;</span> {names.bride}
         </p>
-        <button ref={btn} type="button" className="gate__open" onClick={() => setState("opening")} autoFocus>
+        <button ref={btn} type="button" className="gate__open" onClick={() => {
+            autoStartSound();
+            setState("opening");
+          }}
+          autoFocus
+        >
           {t("Open the doors", "द्वार खोलें")}
         </button>
         <p className="gate__hint">{t("tap · scroll · or press Enter", "छूएँ · स्क्रॉल करें · या Enter दबाएँ")}</p>

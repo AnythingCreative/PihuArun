@@ -8,6 +8,7 @@ import { shareInvitation } from "../lib/share";
 import { SkyLanterns } from "./v2/SkyLanterns";
 import { SectionBackdrop } from "./v2/SectionBackdrop";
 import { useDateFormat, useNames, useT } from "../lib/i18n";
+import { SectionToran } from "./v2/SectionToran";
 import { EASE, MQ, gsap } from "../lib/motion";
 
 const PETAL_COLOURS = ["#f4a21c", "#ff7a1a", "#d6246e", "#f6c34a", "#e2551f", "#fff3c4"];
@@ -57,6 +58,13 @@ export function ClosingScene() {
       tl.from(q(".closing__diya"), { opacity: 0, y: 20, stagger: 0.15, duration: 1.2, ease: EASE.soft })
         .fromTo(q(".closing__corner path"), { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 2, ease: EASE.inOut }, 0.2)
         .from(q(".closing__reveal"), { opacity: 0, y: 24, stagger: 0.18, duration: 1.2, ease: EASE.soft }, 0.5)
+        .fromTo(q(".closing__glow"), { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 2.4, ease: "power2.out" }, 0.6)
+        .call(() => {
+          // the lanterns lift faster for a few seconds, then settle back
+          const lanterns = (q(".lanterns--closing .lantern") as HTMLElement[]).flatMap((l) => l.getAnimations());
+          lanterns.forEach((a) => a.updatePlaybackRate(2.6));
+          window.setTimeout(() => lanterns.forEach((a) => a.updatePlaybackRate(1)), 5000);
+        }, [], 1)
         .call(() => {
           const names = q(".closing__names")[0] as HTMLElement | undefined;
           if (!names) return;
@@ -74,6 +82,7 @@ export function ClosingScene() {
     <section id="blessing" ref={root} className={`closing on-dark ${active ? "is-active" : ""}`} aria-labelledby="closing-title">
       <div className="closing__sky" aria-hidden />
       <SectionBackdrop slot="couple-pheras" className="backdrop--closing" />
+      <SectionToran />
       <div className="closing__river" aria-hidden />
       <SkyLanterns className="lanterns--closing" count={10} />
       <div className="closing__particles" aria-hidden>
@@ -89,6 +98,7 @@ export function ClosingScene() {
       </div>
 
       <div className="closing__content">
+        <span className="closing__glow" aria-hidden />
         <p className="closing__eyebrow label closing__reveal">{t("With Love & Blessings", "स्नेह और आशीर्वाद सहित")}</p>
         <h2
           id="closing-title"

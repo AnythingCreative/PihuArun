@@ -5,6 +5,7 @@ import { TempleGate } from "./components/v2/TempleGate";
 import { Blessings } from "./components/v2/Blessings";
 import { PalaceCouple } from "./components/v2/PalaceCouple";
 import { SkyLanterns } from "./components/v2/SkyLanterns";
+import { VarmalaTrail } from "./components/v2/VarmalaTrail";
 import { CelebrationsByDay } from "./components/v2/CelebrationsByDay";
 import { CelebrationsDeck } from "./components/v2/CelebrationsDeck";
 
@@ -61,6 +62,7 @@ export default function App() {
         <ClosingScene />
       </main>
       <SkyLanterns className="lanterns--page" count={typeof window !== "undefined" && window.matchMedia("(max-width: 720px)").matches ? 5 : 7} scale={0.7} />
+      <VarmalaTrail />
       <BackToTop />
     </>
   );

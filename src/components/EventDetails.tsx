@@ -4,6 +4,7 @@ import { wedding, fullPlace, hasVenue, longDate } from "../config/wedding";
 import { DotDivider, LotusDivider } from "./ornaments/Ornaments";
 import { EASE, MQ, gsap } from "../lib/motion";
 import { SectionBackdrop } from "./v2/SectionBackdrop";
+import { SectionToran } from "./v2/SectionToran";
 import { useDateFormat, useLang, useT } from "../lib/i18n";
 
 function mapsQuery() {
@@ -55,6 +56,7 @@ export function EventDetails() {
   return (
     <section id="details" ref={root} className="details section grain" aria-labelledby="details-title">
       <SectionBackdrop slot="sangam-bg" className="backdrop--details" />
+      <SectionToran />
       <div className="container details__inner">
         <p className="label eyebrow details__reveal">{t("The celebration", "शुभ अवसर")}</p>
         <h2 id="details-title" className="details__title label details__reveal" data-focus-target>

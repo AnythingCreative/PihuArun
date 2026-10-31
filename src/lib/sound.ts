@@ -1,5 +1,6 @@
 /**
- * Optional ambient sound. Off by default and only started by a click.
+ * Ambient sound. Starts with the guest's first tap (opening the doors), as
+ * browsers only allow sound after a tap. A guest who mutes it stays muted.
  *
  * If `wedding.musicUrl` points at a licensed audio file it is played on loop.
  * Otherwise (or if the file fails to load) the page synthesises a calm
@@ -211,15 +212,56 @@ function stopSynth() {
 
 let usingFile = false;
 
+const MUTED_KEY = "invite-muted";
+const remember = (muted: boolean) => {
+  try {
+    localStorage.setItem(MUTED_KEY, muted ? "1" : "0");
+  } catch {
+    /* not remembered */
+  }
+};
+const wasMuted = () => {
+  try {
+    return localStorage.getItem(MUTED_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
+
 export async function startSound() {
+  remember(false);
   if (state === "on" || state === "starting") return;
   set("starting");
   usingFile = await playFile();
   const ok = usingFile || (await playSynth());
-  set(ok ? "on" : "unavailable");
+  // without a tap the browser keeps audio suspended: report it as off, not on
+  const running = usingFile ? !audioEl?.paused : ctx?.state === "running";
+  set(ok ? (running ? "on" : "off") : "unavailable");
+}
+
+let waiting = false;
+
+/**
+ * Music on by default: start now if the browser allows it (call this from a
+ * tap), otherwise on the guest's first tap or key press anywhere. Skipped
+ * for guests who muted it before.
+ */
+export function autoStartSound() {
+  if (wasMuted() || state === "on" || state === "starting") return;
+  void startSound().then(() => {
+    if (state === "on" || waiting) return;
+    waiting = true;
+    const go = () => {
+      ["pointerup", "touchend", "keydown"].forEach((e) => window.removeEventListener(e, go, true));
+      waiting = false;
+      if (!wasMuted() && state !== "on") void startSound();
+    };
+    ["pointerup", "touchend", "keydown"].forEach((e) => window.addEventListener(e, go, true));
+  });
 }
 
 export function stopSound() {
+  remember(true);
   if (usingFile) audioEl?.pause();
   else stopSynth();
   set("off");
