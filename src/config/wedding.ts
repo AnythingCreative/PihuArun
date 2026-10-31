@@ -8,6 +8,16 @@
  * To finish the invitation, fill in the fields marked TO FILL below.
  */
 
+export interface WeddingContact {
+  name: string;
+  /** What to call them about, shown under the name. */
+  role: string;
+  /** Indian mobile number, 10 digits. */
+  phone: string;
+  /** The message WhatsApp opens with, ready for the guest to send. */
+  whatsappText: string;
+}
+
 export interface WeddingConfig {
   groom: string;
   bride: string;
@@ -40,6 +50,8 @@ export interface WeddingConfig {
 
   /** Optional RSVP form link (Google Form, etc.). Button hidden when empty. */
   rsvpUrl: string;
+  /** People guests can call or WhatsApp; shown with the venue details. */
+  contacts: WeddingContact[];
   /** Optional e-mail address that receives guest wishes via the guest's own mail app. */
   wishesEmail: string;
 
@@ -71,6 +83,20 @@ export const wedding: WeddingConfig = {
   ceremonyEnd: "",
 
   rsvpUrl: "",
+  contacts: [
+    {
+      name: "Arun",
+      role: "For anything about the wedding",
+      phone: "7905370013",
+      whatsappText: "Namaste Arun! I received your wedding invitation for 24 November.",
+    },
+    {
+      name: "Kundan",
+      role: "For directions to Shivaya Vatika",
+      phone: "6306403023",
+      whatsappText: "Namaste Kundan ji, I need directions to Shivaya Vatika for Arun & Pratima's wedding.",
+    },
+  ],
   wishesEmail: "",
 
   musicUrl: "",

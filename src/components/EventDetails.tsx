@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef } from "react";
-import { Landmark, MapPin, Navigation as NavIcon, Car, ParkingCircle, ExternalLink } from "lucide-react";
+import { Landmark, MapPin, Phone, MessageCircle, Navigation as NavIcon, Car, ParkingCircle, ExternalLink } from "lucide-react";
 import { wedding, fullPlace, hasVenue, longDate } from "../config/wedding";
 import { DotDivider, LotusDivider } from "./ornaments/Ornaments";
 import { EASE, MQ, gsap } from "../lib/motion";
@@ -115,6 +115,38 @@ export function EventDetails() {
           <div className="details__placeholder details__reveal">
             <DotDivider />
             <p className="lead">Celebration venue details will be shared soon.</p>
+          </div>
+        )}
+
+        {wedding.contacts.length > 0 && (
+          <div className="details__contacts details__reveal">
+            <p className="label eyebrow">Need help? Reach us</p>
+            <ul className="contacts">
+              {wedding.contacts.map((c) => (
+                <li key={c.phone} className="contact">
+                  <p className="contact__name">{c.name}</p>
+                  <p className="contact__role">{c.role}</p>
+                  <p className="contact__number">
+                    +91 {c.phone.slice(0, 5)} {c.phone.slice(5)}
+                  </p>
+                  <div className="contact__actions">
+                    <a className="contact__btn contact__btn--call" href={`tel:+91${c.phone}`}>
+                      <Phone aria-hidden /> Call
+                      <span className="visually-hidden"> {c.name}</span>
+                    </a>
+                    <a
+                      className="contact__btn contact__btn--wa"
+                      href={`https://wa.me/91${c.phone}?text=${encodeURIComponent(c.whatsappText)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <MessageCircle aria-hidden /> WhatsApp
+                      <span className="visually-hidden"> {c.name} (opens WhatsApp)</span>
+                    </a>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 
