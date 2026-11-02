@@ -8,7 +8,7 @@ import { CornerFlourish, Mandala } from "./ornaments/Ornaments";
 import { SkyLanterns } from "./v2/SkyLanterns";
 import { EASE, MQ, gsap } from "../lib/motion";
 import { SectionToran } from "./v2/SectionToran";
-import { useNames, useT } from "../lib/i18n";
+import { useDateFormat, useNames, useT } from "../lib/i18n";
 
 const START = weddingStartsAt();
 const DAY_END = weddingDayEndsAt();
@@ -55,7 +55,10 @@ function CountdownClock() {
   return (
     <div className="countdown">
       <p className="visually-hidden">
-        {plural(c.days, "day")}, {plural(c.hours, "hour")} and {plural(c.minutes, "minute")} until the wedding.
+        {t(
+          `${plural(c.days, "day")}, ${plural(c.hours, "hour")} and ${plural(c.minutes, "minute")} until the wedding.`,
+          `विवाह में ${c.days} दिन, ${c.hours} घंटे और ${c.minutes} मिनट शेष।`,
+        )}
       </p>
       <ol className="countdown__units" aria-hidden>
         {UNITS.map((u) => (
@@ -90,7 +93,7 @@ export function WeddingCountdown() {
         .fromTo(q(".savedate__frame .savedate__corner path"), { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1.2, ease: EASE.inOut }, 0.7)
         .from(q(".savedate__digit"), { yPercent: 110, opacity: 0, rotateX: -80, stagger: 0.06, duration: 0.8, ease: "back.out(1.7)" }, 0.8)
         .from(q(".savedate__frame p:not(.savedate__date)"), { opacity: 0, y: 14, stagger: 0.12, duration: 0.8 }, 1.4)
-        .from(q(".countdown__unit"), { opacity: 0, y: 30, scale: 0.8, stagger: 0.1, duration: 0.9, ease: "back.out(1.6)" }, 1.6)
+        .from(q(".countdown__unit, .countdown__celebrate"), { opacity: 0, y: 30, scale: 0.8, stagger: 0.1, duration: 0.9, ease: "back.out(1.6)" }, 1.6)
         .from(q(".savedate__actions > *, .savedate__fineprint"), { opacity: 0, y: 20, stagger: 0.1, duration: 0.8 }, 2);
     });
 
@@ -103,6 +106,7 @@ export function WeddingCountdown() {
   };
 
   const date = dottedDate();
+  const fmtLong = useDateFormat();
 
   return (
     <section id="wedding-day" ref={root} className="savedate on-dark" aria-labelledby="savedate-title">
@@ -127,7 +131,7 @@ export function WeddingCountdown() {
               <CornerFlourish className="savedate__corner savedate__corner--br" />
               <p className="savedate__date display">
                 <time dateTime={wedding.date}>
-                  <span className="visually-hidden">{longDate()}</span>
+                  <span className="visually-hidden">{t(longDate(), fmtLong(wedding.date, { weekday: "long", day: "numeric", month: "long", year: "numeric" }))}</span>
                   {date.split("").map((ch, i) => (
                     <span key={i} className={`savedate__digit ${ch === "." ? "is-dot" : ""}`} aria-hidden>
                       {ch}

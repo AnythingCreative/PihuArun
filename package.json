@@ -16,7 +16,9 @@
     "art-in": "node scripts/process-art.mjs",
     "walk": "node scripts/mobile-walk.mjs",
     "og": "node scripts/render-og.mjs",
-    "deploy": "node scripts/deploy.mjs"
+    "deploy": "node scripts/deploy.mjs",
+    "sweep": "node scripts/layout-sweep.mjs",
+    "break": "node scripts/break-test.mjs"
   },
   "dependencies": {
     "@fontsource/cinzel-decorative": "^5.3.0",

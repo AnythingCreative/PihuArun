@@ -30,9 +30,18 @@ export default function App() {
     document.fonts?.ready.then(() => {
       if (!cancelled) ScrollTrigger.refresh();
     });
-    // Honour a deep link such as /#details once pins exist.
+    // Honour a deep link such as /#details. Jump straight there, and again
+    // whenever the page re-measures (fonts, images, pins) shifts it, until the
+    // guest scrolls by themselves. A smooth scroll here got cancelled by those.
     const id = window.location.hash.slice(1);
-    const t = id ? window.setTimeout(() => scrollToSection(id), 300) : 0;
+    let settled = !id;
+    const settle = () => (settled = true);
+    const land = () => !settled && scrollToSection(id, true);
+    const t = id ? window.setTimeout(land, 300) : 0;
+    const later = id ? [800, 1600, 2600].map((ms) => window.setTimeout(land, ms)) : [];
+    ScrollTrigger.addEventListener("refresh", land);
+    window.addEventListener("load", land);
+    for (const e of ["wheel", "touchstart", "keydown", "pointerdown"]) window.addEventListener(e, settle, { once: true, passive: true });
 
     if (import.meta.env.DEV) {
       const missing = missingDetails();
@@ -41,6 +50,10 @@ export default function App() {
     return () => {
       cancelled = true;
       window.clearTimeout(t);
+      later.forEach(window.clearTimeout);
+      ScrollTrigger.removeEventListener("refresh", land);
+      window.removeEventListener("load", land);
+      settled = true;
     };
   }, []);
 

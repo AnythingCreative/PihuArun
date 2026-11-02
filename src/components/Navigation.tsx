@@ -39,6 +39,13 @@ export function Navigation() {
 
   useEffect(() => {
     document.documentElement.classList.toggle("menu-open", open);
+    if (!open) return;
+    // rotating a tablet or widening the window swaps to the full nav: don't leave the page locked
+    const wide = window.matchMedia("(min-width: 1024px)");
+    const close = () => wide.matches && setOpen(false);
+    close();
+    wide.addEventListener("change", close);
+    return () => wide.removeEventListener("change", close);
   }, [open]);
 
   const go = (id: string) => (e: React.MouseEvent) => {
@@ -57,7 +64,7 @@ export function Navigation() {
           <span>{wedding.bride[0]}</span>
         </a>
 
-        <nav className="site-nav" aria-label="Sections">
+        <nav className="site-nav" aria-label={t("Sections", "भाग")}>
           <ul>
             {NAV_LINKS.map((l) => (
               <li key={l.id}>
@@ -87,7 +94,7 @@ export function Navigation() {
       </div>
 
       <div id="mobile-menu" ref={menuRef} className="mobile-menu" hidden={!open}>
-        <nav aria-label="Sections (menu)">
+        <nav aria-label={t("Sections (menu)", "भाग (मेनू)")}>
           <ul>
             {[{ id: "top", label: "Beginning", hi: "शुरुआत" }, ...NAV_LINKS].map((l, i) => (
               <li key={l.id} style={{ ["--i" as string]: i }}>

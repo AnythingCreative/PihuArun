@@ -7,7 +7,7 @@ import { scrollToSection } from "../lib/scrollTo";
 import { shareInvitation } from "../lib/share";
 import { SkyLanterns } from "./v2/SkyLanterns";
 import { SectionBackdrop } from "./v2/SectionBackdrop";
-import { useDateFormat, useNames, useT } from "../lib/i18n";
+import { useDateFormat, useLang, useNames, useT } from "../lib/i18n";
 import { SectionToran } from "./v2/SectionToran";
 import { EASE, MQ, gsap } from "../lib/motion";
 
@@ -43,6 +43,7 @@ const DIYAS = [
 /** Section 11 — the final blessing: lamps glowing by the river at night. */
 export function ClosingScene() {
   const t = useT();
+  const lang = useLang();
   const names = useNames();
   const fmt = useDateFormat();
   const root = useRef<HTMLElement>(null);
@@ -118,10 +119,12 @@ export function ClosingScene() {
         <span className="closing__line" aria-hidden />
         <p className="closing__hindi deva closing__reveal" lang="hi">
           प्रेम • परंपरा • साथ
-          <span className="visually-hidden" lang="en">
-            {" "}
-            (love, tradition, togetherness)
-          </span>
+          {lang === "en" && (
+            <span className="visually-hidden" lang="en">
+              {" "}
+              (love, tradition, togetherness)
+            </span>
+          )}
         </p>
 
         <div className="closing__diyas" aria-hidden>

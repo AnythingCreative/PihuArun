@@ -96,7 +96,7 @@ export function EventDetails() {
             {embeddable && (
               <iframe
                 className="details__map"
-                title={`Map showing ${wedding.venueName || "the venue"}`}
+                title={t(`Map showing ${wedding.venueName || "the venue"}`, `${wedding.venueName || "स्थल"} का नक्शा`)}
                 src={`https://www.google.com/maps?q=${encodeURIComponent(embedQuery)}&output=embed`}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
@@ -138,7 +138,7 @@ export function EventDetails() {
                   <div className="contact__actions">
                     <a className="contact__btn contact__btn--call" href={`tel:+91${c.phone}`}>
                       <Phone aria-hidden /> {t("Call", "कॉल करें")}
-                      <span className="visually-hidden"> {c.name}</span>
+                      <span className="visually-hidden"> {hindi ? c.nameHi : c.name}</span>
                     </a>
                     <a
                       className="contact__btn contact__btn--wa"
@@ -147,7 +147,7 @@ export function EventDetails() {
                       rel="noopener noreferrer"
                     >
                       <MessageCircle aria-hidden /> WhatsApp
-                      <span className="visually-hidden"> {c.name} (opens WhatsApp)</span>
+                      <span className="visually-hidden"> {hindi ? `${c.nameHi} (WhatsApp खुलेगा)` : `${c.name} (opens WhatsApp)`}</span>
                     </a>
                   </div>
                 </li>
@@ -159,7 +159,7 @@ export function EventDetails() {
         {wedding.rsvpUrl && (
           <a className="btn btn--ghost details__reveal" href={wedding.rsvpUrl} target="_blank" rel="noopener noreferrer">
             RSVP <ExternalLink aria-hidden />
-            <span className="visually-hidden">(opens in a new tab)</span>
+            <span className="visually-hidden">{t("(opens in a new tab)", "(नए टैब में खुलेगा)")}</span>
           </a>
         )}
       </div>

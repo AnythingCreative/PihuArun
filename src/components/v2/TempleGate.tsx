@@ -152,7 +152,7 @@ export function TempleGate() {
         </div>
       </div>
       <div className="gate__seal">
-        <GaneshMotif className="gate__ganesh" title="Shri Ganesh" />
+        <GaneshMotif className="gate__ganesh" title={t("Shri Ganesh", "श्री गणेश")} />
         <p className="gate__shloka deva" lang="sa">॥ श्री गणेशाय नमः ॥</p>
         <p className="gate__names">
           {names.groom} <span>&amp;</span> {names.bride}

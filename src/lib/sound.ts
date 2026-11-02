@@ -256,7 +256,7 @@ const wasMuted = () => {
 function startSynth() {
   usingFile = false;
   if (!playSynth()) return set("unavailable");
-  if (ctx?.state === "running") {
+  if (ctx?.state === "running" || tapIsActive()) {
     stopWaiting();
     set("on");
   } else {
@@ -265,10 +265,20 @@ function startSynth() {
   }
 }
 
+/** False only when the browser can tell this is not inside a tap (so a start would be refused). */
+const userActivation = () => (navigator as unknown as { userActivation?: { isActive: boolean } }).userActivation;
+const tapAllowsSound = () => !userActivation() || userActivation()!.isActive || ctx?.state === "running";
+/** Known to be inside a tap right now (so resume() will succeed). */
+const tapIsActive = () => userActivation()?.isActive === true;
+
 export function startSound() {
   remember(false);
   wanted = true;
   if (state === "on") return;
+  if (!tapAllowsSound()) {
+    set("off");
+    return waitForTap();
+  }
   preferPlayback();
   if (!wedding.musicUrl || fileFailed) return startSynth();
   set("starting");

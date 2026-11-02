@@ -439,3 +439,39 @@ html.gate-locked .varmala { opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .painting__stack img { transition: none; } }
 @media (max-width: 1023.98px) { .blessings__paintings.has-cycle .blessings__story { order: 0; } }
+
+/* ---------- Save-the-date: the number always fits its card ----------
+   "24.11.2026" is about 5.7× as wide as its font size; size it from the
+   card's own width instead of the window's (the card stops growing at
+   36rem but the window doesn't). */
+.savedate__date { font-size: min(clamp(2.6rem, 1.6rem + 5vw, 6rem), 12.5vw, 4.8rem); }
+@supports (container-type: inline-size) {
+  .savedate__frame { container-type: inline-size; }
+  .savedate__date { font-size: min(6rem, 16cqi); }
+}
+
+/* an image that couldn't download hides rather than showing a broken icon */
+img[data-failed] { visibility: hidden !important; }
+
+/* keyboard users can see when the map has focus */
+.details__venue-block:focus-within .details__map { outline: 2px solid #ffd76a; outline-offset: 3px; }
+
+/* ---------- Hero on small phones with large text ----------
+   rem-based minimums grew past a 320px screen at 150% text; cap every line
+   by the screen width too, and never let one line widen the whole column. */
+.hero__content { width: 100%; }
+.hero__content > * { max-width: 100%; overflow-wrap: break-word; }
+.hero__names { font-size: min(clamp(2.6rem, 8.6vw, 6.6rem), 13vw); }
+.hero__families { font-size: min(clamp(1.4rem, 1rem + 1.2vw, 2.1rem), 7vw); }
+.hero__date { font-size: min(clamp(1.4rem, 1.1rem + 1.2vw, 2.1rem), 6.6vw); letter-spacing: min(0.16em, 1vw); }
+.hero__invite { letter-spacing: min(var(--tracking-label), 0.9vw); }
+
+/* The names rise out of a masked box; give the mask room for the glow so its
+   soft shadow isn't sliced into a visible rectangle (most visible in Hindi). */
+.hero__name { padding-block: 0.26em 0.24em; margin-block: -0.22em; }
+@supports (overflow: clip) {
+  .hero__name { overflow-x: visible; overflow-y: clip; }
+}
+.details__date { font-size: min(clamp(2.2rem, 1.4rem + 3.4vw, 4.2rem), 8.4vw); overflow-wrap: break-word; }
+.closing__names { font-size: min(clamp(2.4rem, 1.4rem + 5vw, 6rem), 11vw); }
+.closing__eyebrow { letter-spacing: min(var(--tracking-label), 0.9vw); max-width: 100%; }

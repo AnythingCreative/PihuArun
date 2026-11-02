@@ -113,7 +113,7 @@ export function InvitationHero() {
       </div>
 
       <div className="hero__content">
-        <GaneshMotif className="hero__ganesh" title="Shri Ganesh" />
+        <GaneshMotif className="hero__ganesh" title={t("Shri Ganesh", "श्री गणेश")} />
         <p className="hero__shloka deva" lang="sa">
           ॥ श्री गणेशाय नमः ॥
         </p>

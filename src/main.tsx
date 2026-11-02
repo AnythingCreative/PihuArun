@@ -30,6 +30,14 @@ import "./styles/v3.css";
 import App from "./App";
 
 document.documentElement.classList.add("js");
+window.addEventListener(
+  "error",
+  (e) => {
+    // a data attribute, as React rewrites class names on re-render
+    if (e.target instanceof HTMLImageElement) e.target.dataset.failed = "";
+  },
+  true,
+);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
