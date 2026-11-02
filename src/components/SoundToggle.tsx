@@ -3,7 +3,7 @@ import { Volume2, VolumeX } from "lucide-react";
 import { soundState, subscribeSound, toggleSound } from "../lib/sound";
 import { useT } from "../lib/i18n";
 
-/** Sound is off until the visitor presses this. Never autoplays. */
+/** Mutes and unmutes the music (which starts with the guest's first tap). */
 export function SoundToggle({ className }: { className?: string }) {
   const state = useSyncExternalStore(subscribeSound, soundState, () => "off" as const);
   const on = state === "on";
@@ -17,7 +17,7 @@ export function SoundToggle({ className }: { className?: string }) {
       aria-pressed={on}
       aria-label={label}
       title={label}
-      onClick={() => void toggleSound()}
+      onClick={toggleSound}
       disabled={state === "starting"}
     >
       {on ? <Volume2 aria-hidden /> : <VolumeX aria-hidden />}

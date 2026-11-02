@@ -30,8 +30,7 @@ export const subscribeSound = (l: Listener) => {
 
 let audioEl: HTMLAudioElement | null = null;
 
-async function playFile(): Promise<boolean> {
-  if (!wedding.musicUrl) return false;
+async function playFile(): Promise<"ok" | "blocked" | "failed"> {
   try {
     audioEl ??= Object.assign(new Audio(/^https?:/.test(wedding.musicUrl) ? wedding.musicUrl : publicUrl(wedding.musicUrl)), {
       loop: true,
@@ -39,10 +38,12 @@ async function playFile(): Promise<boolean> {
       preload: "auto",
     });
     await audioEl.play();
-    return true;
-  } catch {
+    return "ok";
+  } catch (e) {
+    // blocked until a tap: keep the file and try again then
+    if ((e as DOMException)?.name === "NotAllowedError") return "blocked";
     audioEl = null;
-    return false;
+    return "failed";
   }
 }
 
@@ -157,7 +158,7 @@ function schedule() {
   }
 }
 
-async function playSynth(): Promise<boolean> {
+function playSynth(): boolean {
   const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
   if (!AC) return false;
   try {
@@ -175,8 +176,16 @@ async function playSynth(): Promise<boolean> {
       master.connect(tone);
       tone.connect(ctx.destination);
       tone.connect(verb).connect(wet).connect(ctx.destination);
+      ctx.onstatechange = () => {
+        if (ctx?.state === "running" && wanted && !usingFile) {
+          stopWaiting();
+          set("on");
+        }
+      };
     }
-    await ctx.resume();
+    // Phones only allow this inside a real tap. Without one the promise can
+    // stay pending forever, so never wait on it: statechange reports success.
+    ctx.resume().catch(() => {});
     nextPluck = ctx.currentTime + 0.1;
     nextBell = ctx.currentTime + 3;
     if (!padStarted) {
@@ -211,6 +220,22 @@ function stopSynth() {
 /* ---------------- public API ---------------- */
 
 let usingFile = false;
+let fileFailed = false;
+/** The guest wants music (not muted), even while the browser still holds it back. */
+let wanted = false;
+
+/**
+ * iPhones treat web audio like a game sound and silence it when the ringer
+ * switch is off. Ask for "playback" (like a video) so the music is heard.
+ */
+function preferPlayback() {
+  const session = (navigator as unknown as { audioSession?: { type: string } }).audioSession;
+  try {
+    if (session) session.type = "playback";
+  } catch {
+    /* older browsers */
+  }
+}
 
 const MUTED_KEY = "invite-muted";
 const remember = (muted: boolean) => {
@@ -228,40 +253,73 @@ const wasMuted = () => {
   }
 };
 
-export async function startSound() {
-  remember(false);
-  if (state === "on" || state === "starting") return;
-  set("starting");
-  usingFile = await playFile();
-  const ok = usingFile || (await playSynth());
-  // without a tap the browser keeps audio suspended: report it as off, not on
-  const running = usingFile ? !audioEl?.paused : ctx?.state === "running";
-  set(ok ? (running ? "on" : "off") : "unavailable");
+function startSynth() {
+  usingFile = false;
+  if (!playSynth()) return set("unavailable");
+  if (ctx?.state === "running") {
+    stopWaiting();
+    set("on");
+  } else {
+    set("off");
+    waitForTap();
+  }
 }
 
+export function startSound() {
+  remember(false);
+  wanted = true;
+  if (state === "on") return;
+  preferPlayback();
+  if (!wedding.musicUrl || fileFailed) return startSynth();
+  set("starting");
+  void playFile().then((r) => {
+    if (r === "ok" && wanted) {
+      usingFile = true;
+      stopWaiting();
+      set("on");
+    } else if (r === "ok") audioEl?.pause();
+    else if (r === "blocked") {
+      set("off");
+      waitForTap();
+    } else {
+      fileFailed = true;
+      startSynth();
+    }
+  });
+}
+
+/* Browsers allow sound only after a real tap or key press (not a swipe, and
+   on phones not the moment a finger lands). Until one happens, every tap
+   anywhere tries again. */
+const TAP_EVENTS = ["pointerup", "touchend", "click", "keydown"];
 let waiting = false;
+const onTap = () => {
+  if (!wanted || wasMuted()) return stopWaiting();
+  startSound();
+};
+function waitForTap() {
+  if (waiting) return;
+  waiting = true;
+  TAP_EVENTS.forEach((e) => window.addEventListener(e, onTap, true));
+}
+function stopWaiting() {
+  waiting = false;
+  TAP_EVENTS.forEach((e) => window.removeEventListener(e, onTap, true));
+}
 
 /**
- * Music on by default: start now if the browser allows it (call this from a
- * tap), otherwise on the guest's first tap or key press anywhere. Skipped
- * for guests who muted it before.
+ * Music on by default: starts now if the browser allows it, otherwise on the
+ * guest's first tap anywhere. Skipped for guests who muted it before.
  */
 export function autoStartSound() {
-  if (wasMuted() || state === "on" || state === "starting") return;
-  void startSound().then(() => {
-    if (state === "on" || waiting) return;
-    waiting = true;
-    const go = () => {
-      ["pointerup", "touchend", "keydown"].forEach((e) => window.removeEventListener(e, go, true));
-      waiting = false;
-      if (!wasMuted() && state !== "on") void startSound();
-    };
-    ["pointerup", "touchend", "keydown"].forEach((e) => window.addEventListener(e, go, true));
-  });
+  if (wasMuted() || state === "on") return;
+  startSound();
 }
 
 export function stopSound() {
   remember(true);
+  wanted = false;
+  stopWaiting();
   if (usingFile) audioEl?.pause();
   else stopSynth();
   set("off");
