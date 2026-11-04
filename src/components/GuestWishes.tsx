@@ -4,6 +4,7 @@ import { wedding } from "../config/wedding";
 import { Lotus, Toran } from "./ornaments/Ornaments";
 import { EASE, MQ, gsap } from "../lib/motion";
 import { useNames, useT } from "../lib/i18n";
+import { GuestAlbum } from "./GuestAlbum";
 
 const MAX_NAME = 60;
 const MAX_MESSAGE = 500;
@@ -158,6 +159,8 @@ export function GuestWishes() {
             )}
           </div>
         </form>
+
+        <GuestAlbum />
       </div>
     </section>
   );

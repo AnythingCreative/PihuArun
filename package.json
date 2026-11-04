@@ -18,7 +18,8 @@
     "og": "node scripts/render-og.mjs",
     "deploy": "node scripts/deploy.mjs",
     "sweep": "node scripts/layout-sweep.mjs",
-    "break": "node scripts/break-test.mjs"
+    "break": "node scripts/break-test.mjs",
+    "album": "node scripts/album-test.mjs"
   },
   "dependencies": {
     "@fontsource/cinzel-decorative": "^5.3.0",
@@ -32,6 +33,7 @@
     "@fontsource/yatra-one": "^5.3.0",
     "gsap": "^3.15.0",
     "lucide-react": "^1.59.0",
+    "qrcode-generator": "1.4.4",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },

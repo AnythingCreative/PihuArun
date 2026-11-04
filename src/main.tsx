@@ -27,6 +27,7 @@ import "./styles/sections.css";
 import "./styles/animations.css";
 import "./styles/v2.css";
 import "./styles/v3.css";
+import "./styles/album.css";
 import App from "./App";
 
 document.documentElement.classList.add("js");
