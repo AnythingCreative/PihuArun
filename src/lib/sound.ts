@@ -3,10 +3,10 @@
  * browsers only allow sound after a tap. A guest who mutes it stays muted.
  *
  * If `wedding.musicUrl` points at a licensed audio file it is played on loop.
- * Otherwise (or if the file fails to load) the page synthesises a calm
- * ambience in the browser: a warm Sa–Pa pad that slowly breathes, a gentle
- * tanpura under it and a distant temple bell every so often. Original, so
- * there are no copyright questions and no asset that can go missing.
+ * Otherwise (or if the file fails to load) the page plays a slow santoor
+ * melody in Raag Yaman, synthesised in the browser: just the santoor, no
+ * drone or drums. Original, so there are no copyright questions and no
+ * asset that can go missing.
  */
 import { wedding } from "../config/wedding";
 import { publicUrl } from "../data/assets";
@@ -47,19 +47,32 @@ async function playFile(): Promise<"ok" | "blocked" | "failed"> {
   }
 }
 
-/* ---------------- synthesised tanpura ---------------- */
+/* ---------------- synthesised santoor ---------------- */
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let scheduler = 0;
-let nextPluck = 0;
-let pluckIndex = 0;
+let nextNote = 0;
+let noteIndex = 0;
 
-const SA = 146.83; // D3
-// The classic tuning: Pa, Sa', Sa', Sa (low)
-const STRINGS = [SA * 0.75, SA, SA, SA / 2];
-const GAP = 1.6;
-const CYCLE_PAUSE = 1.4;
+const SA = 293.66; // D4
+const BEAT = 0.52;
+
+/**
+ * The tune: [semitones from Sa, beats, bass note under it]. Raag Yaman,
+ * four slow phrases that come home to Sa. Long notes are held with a soft
+ * tremolo, the way santoor players sustain them.
+ */
+const TUNE: [number | null, number, number?][] = [
+  // N R G · R G M P · M G R G R S
+  [-1, 1, -12], [2, 1], [4, 2], [2, 1], [4, 1], [6, 1], [7, 3, -5], [6, 1], [4, 1], [2, 1], [4, 1], [2, 1], [0, 3, -12], [null, 1],
+  // S G P D N S' · N D P · M G R
+  [0, 1, -12], [4, 1], [7, 1], [9, 1], [11, 1], [12, 3, -5], [11, 1], [9, 1], [7, 2], [6, 1], [4, 1], [2, 2, -10], [null, 1],
+  // G P D S' D P · M G R G R S · N R S
+  [4, 1, -8], [7, 1], [9, 1], [12, 2], [9, 1], [7, 1], [6, 1], [4, 2], [2, 1], [4, 1], [2, 1], [0, 2, -12], [-1, 1], [2, 1], [0, 4, -12], [null, 2],
+  // P M G R · G M P D P · M G R S
+  [7, 2, -5], [6, 1], [4, 1], [2, 2], [4, 1], [6, 1], [7, 1], [9, 1], [7, 3, -5], [6, 1], [4, 1], [2, 1], [0, 4, -12], [null, 3],
+];
 
 function impulse(c: AudioContext, seconds: number) {
   const len = Math.floor(c.sampleRate * seconds);
@@ -71,90 +84,65 @@ function impulse(c: AudioContext, seconds: number) {
   return buf;
 }
 
-function pluck(c: AudioContext, out: AudioNode, freq: number, t: number) {
-  const osc = c.createOscillator();
-  osc.type = "triangle";
-  osc.frequency.value = freq;
-  osc.detune.value = (Math.random() - 0.5) * 6;
-  // the "jawari" shimmer: a resonant band sweeping down through the harmonics
-  const bp = c.createBiquadFilter();
-  bp.type = "bandpass";
-  bp.Q.value = 6;
-  bp.frequency.setValueAtTime(freq * 8, t);
-  bp.frequency.exponentialRampToValueAtTime(freq * 2.5, t + 4.5);
-  const body = c.createBiquadFilter();
-  body.type = "lowpass";
-  body.frequency.value = freq * 4;
-  const g = c.createGain();
-  g.gain.setValueAtTime(0.0001, t);
-  g.gain.exponentialRampToValueAtTime(0.32, t + 0.12);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + 6);
-  osc.connect(bp).connect(g);
-  osc.connect(body).connect(g);
-  g.connect(out);
-  osc.start(t);
-  osc.stop(t + 6.1);
-}
+let hammerNoise: AudioBuffer | null = null;
 
-/** A warm, slowly breathing Sa–Pa–Sa' pad that sits under everything. */
-function startPad(c: AudioContext, out: AudioNode) {
-  const pad = c.createGain();
-  pad.gain.value = 0.22;
-  const lp = c.createBiquadFilter();
-  lp.type = "lowpass";
-  lp.frequency.value = 900;
-  pad.connect(lp).connect(out);
-  // breathing: a very slow swell in and out
-  const lfo = c.createOscillator();
-  const depth = c.createGain();
-  lfo.frequency.value = 0.07;
-  depth.gain.value = 0.08;
-  lfo.connect(depth).connect(pad.gain);
-  lfo.start();
-  for (const [f, level] of [[SA / 2, 0.5], [SA * 0.75, 0.25], [SA, 0.3], [SA * 1.5, 0.08]] as const) {
-    for (const det of [-4, 4]) {
-      const o = c.createOscillator();
-      o.type = "sine";
-      o.frequency.value = f;
-      o.detune.value = det;
-      const g = c.createGain();
-      g.gain.value = level;
-      o.connect(g).connect(pad);
-      o.start();
-    }
-  }
-}
-
-/** A small temple bell far away: inharmonic partials with a long, soft decay. */
-function bell(c: AudioContext, out: AudioNode, t: number) {
-  const base = SA * 4;
-  for (const [ratio, level, decay] of [[1, 0.09, 7], [2.76, 0.04, 4], [5.4, 0.02, 2.5], [8.93, 0.01, 1.5]] as const) {
+/** One hammer stroke on a santoor course: three slightly detuned strings, a soft overtone and the tap of the hammer. */
+function strike(c: AudioContext, out: AudioNode, freq: number, t: number, velocity = 1) {
+  const ring = Math.min(3.2, 900 / freq); // low strings ring longer
+  for (const det of [-5, 0, 5]) {
     const o = c.createOscillator();
-    o.type = "sine";
-    o.frequency.value = base * ratio;
+    o.type = "triangle";
+    o.frequency.value = freq;
+    o.detune.value = det + (Math.random() - 0.5) * 2;
     const g = c.createGain();
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(level, t + 0.01);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+    g.gain.exponentialRampToValueAtTime(0.1 * velocity, t + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + ring);
     o.connect(g).connect(out);
     o.start(t);
-    o.stop(t + decay + 0.1);
+    o.stop(t + ring + 0.05);
   }
+  const over = c.createOscillator();
+  over.frequency.value = freq * 2;
+  const og = c.createGain();
+  og.gain.setValueAtTime(0.0001, t);
+  og.gain.exponentialRampToValueAtTime(0.04 * velocity, t + 0.003);
+  og.gain.exponentialRampToValueAtTime(0.0001, t + ring * 0.3);
+  over.connect(og).connect(out);
+  over.start(t);
+  over.stop(t + ring * 0.3 + 0.05);
+  if (!hammerNoise) {
+    hammerNoise = c.createBuffer(1, Math.floor(c.sampleRate * 0.03), c.sampleRate);
+    const d = hammerNoise.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 4);
+  }
+  const tap = c.createBufferSource();
+  tap.buffer = hammerNoise;
+  const bp = c.createBiquadFilter();
+  bp.type = "bandpass";
+  bp.frequency.value = Math.min(freq * 6, 5000);
+  bp.Q.value = 2;
+  const tg = c.createGain();
+  tg.gain.value = 0.05 * velocity;
+  tap.connect(bp).connect(tg).connect(out);
+  tap.start(t);
 }
 
-let nextBell = 0;
-let padStarted = false;
+const note = (semitones: number) => SA * Math.pow(2, semitones / 12);
 
 function schedule() {
   if (!ctx || !master) return;
-  while (nextPluck < ctx.currentTime + 0.6) {
-    pluck(ctx, master, STRINGS[pluckIndex % 4], nextPluck);
-    pluckIndex++;
-    nextPluck += pluckIndex % 4 === 0 ? GAP + CYCLE_PAUSE : GAP;
-  }
-  if (nextBell < ctx.currentTime + 0.6) {
-    bell(ctx, master, Math.max(nextBell, ctx.currentTime + 0.05));
-    nextBell = ctx.currentTime + 11 + Math.random() * 8;
+  while (nextNote < ctx.currentTime + 0.6) {
+    const [s, beats, bass] = TUNE[noteIndex % TUNE.length];
+    const t = nextNote;
+    if (s !== null) {
+      strike(ctx, master, note(s), t);
+      // hold long notes with a quiet tremolo that fades away
+      if (beats >= 2) for (let k = 2, n = beats * 4 - 2; k < n; k++) strike(ctx, master, note(s), t + (k * BEAT) / 4, 0.32 * (1 - k / n) + 0.08);
+    }
+    if (bass !== undefined) strike(ctx, master, note(bass), t, 0.7);
+    noteIndex++;
+    nextNote += beats * BEAT;
   }
 }
 
@@ -186,15 +174,11 @@ function playSynth(): boolean {
     // Phones only allow this inside a real tap. Without one the promise can
     // stay pending forever, so never wait on it: statechange reports success.
     ctx.resume().catch(() => {});
-    nextPluck = ctx.currentTime + 0.1;
-    nextBell = ctx.currentTime + 3;
-    if (!padStarted) {
-      startPad(ctx, master!);
-      padStarted = true;
-    }
+    nextNote = ctx.currentTime + 0.1;
+    noteIndex = 0;
     master!.gain.cancelScheduledValues(ctx.currentTime);
     master!.gain.setValueAtTime(master!.gain.value, ctx.currentTime);
-    master!.gain.linearRampToValueAtTime(0.09, ctx.currentTime + 4);
+    master!.gain.linearRampToValueAtTime(0.13, ctx.currentTime + 3);
     schedule();
     window.clearInterval(scheduler);
     scheduler = window.setInterval(schedule, 200);
