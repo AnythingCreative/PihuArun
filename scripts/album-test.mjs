@@ -18,7 +18,7 @@ const fakeNow = (iso) => `{
   class D extends R { constructor(...a) { super(...(a.length ? a : [T + (R.now() - start)])); } static now() { return T + (R.now() - start); } }
   window.Date = D;
 }`;
-async function open({ link = TEST, now = "2026-11-04T12:00:00+05:30", query = "", phone = false, lang } = {}) {
+async function open({ link = TEST, now = "2026-11-03T12:00:00+05:30", query = "", phone = false, lang } = {}) {
   const ctx = await browser.newContext(phone ? { viewport: { width: 375, height: 667 }, isMobile: true, hasTouch: true } : { viewport: { width: 1366, height: 800 } });
   await ctx.addInitScript(fakeNow(now));
   if (lang) await ctx.addInitScript(`localStorage.setItem("invite-lang", "${lang}")`);
@@ -39,8 +39,9 @@ const isOpen = (p) => p.evaluate(() => !!document.querySelector("dialog.album-di
 for (const [label, opts, want] of [
   ["no link, ?mode=album", { link: "", query: "?mode=album" }, 0],
   ["not a web link, ?mode=album", { link: "javascript:alert(1)", query: "?mode=album" }, 0],
-  ["link set, 4 Nov (before the date)", {}, 0],
-  ["link set, 22 Nov 23:59 IST", { now: "2026-11-22T23:59:00+05:30" }, 0],
+  ["link set, 3 Nov (before the date)", {}, 0],
+  ["link set, 3 Nov 23:59 IST", { now: "2026-11-03T23:59:00+05:30" }, 0],
+  ["link set, 4 Nov (from today)", { now: "2026-11-04T00:01:00+05:30" }, 1],
   ["link set, 23 Nov (Haldi day)", { now: "2026-11-23T08:00:00+05:30" }, 1],
   ["link set, ?mode=album early", { query: "?mode=album" }, 1],
   ["link set, ?mode=after early", { query: "?mode=after" }, 1],

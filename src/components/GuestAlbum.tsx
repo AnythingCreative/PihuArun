@@ -5,8 +5,8 @@ import { Printer, X } from "lucide-react";
 import { dottedDate, wedding, weddingDayEndsAt } from "../config/wedding";
 import { useNames, useT } from "../lib/i18n";
 
-/** The album card appears on the first celebration day (Haldi & Mehendi)… */
-const ALBUM_FROM = new Date(`2026-11-23T00:00:00${wedding.utcOffset}`);
+/** The album card is on the page from 4 Nov 2026 (shown early at the couple’s request)… */
+const ALBUM_FROM = new Date(`2026-11-04T00:00:00${wedding.utcOffset}`);
 /** …and turns into a thank-you once the wedding day is over. */
 const AFTER_DATE = weddingDayEndsAt();
 
@@ -51,7 +51,7 @@ function qrSvg(url: string): string {
  * Guest photo album: a small QR card in the wishes section that guests can
  * scan straight off a laptop screen, and that opens the full table card
  * (the same one that is printed at A5 for the venue tables).
- * Hidden until the first celebration day, or when no album link is set.
+ * Hidden before ALBUM_FROM, or when no album link is set.
  */
 export function GuestAlbum() {
   const t = useT();
