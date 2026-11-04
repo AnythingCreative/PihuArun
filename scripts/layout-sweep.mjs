@@ -68,7 +68,7 @@ for (const size of SIZES) {
       const ctx = await browser.newContext({ viewport: { width: w, height: h }, isMobile: w < 700 || h < 450, hasTouch: w < 1100, deviceScaleFactor: 1 });
       await ctx.addInitScript(([lang, scale]) => {
         localStorage.setItem("invite-lang", lang);
-        localStorage.setItem("invite-muted", "1");
+        sessionStorage.setItem("invite-muted", "1");
         if (scale !== 100) document.addEventListener("DOMContentLoaded", () => (document.documentElement.style.fontSize = scale + "%"));
       }, [lang, scale]);
       const p = await ctx.newPage();

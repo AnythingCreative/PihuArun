@@ -19,7 +19,8 @@
     "deploy": "node scripts/deploy.mjs",
     "sweep": "node scripts/layout-sweep.mjs",
     "break": "node scripts/break-test.mjs",
-    "album": "node scripts/album-test.mjs"
+    "album": "node scripts/album-test.mjs",
+    "music": "node scripts/music-test.mjs"
   },
   "dependencies": {
     "@fontsource/cinzel-decorative": "^5.3.0",

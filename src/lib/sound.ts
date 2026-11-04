@@ -1,6 +1,7 @@
 /**
  * Ambient sound. Starts with the guest's first tap (opening the doors), as
- * browsers only allow sound after a tap. A guest who mutes it stays muted.
+ * browsers only allow sound after a tap. A guest who mutes it stays muted
+ * for the rest of that visit; every new visit starts with music again.
  *
  * If `wedding.musicUrl` points at a licensed audio file it is played on loop.
  * Otherwise (or if the file fails to load) the page plays a slow santoor
@@ -222,16 +223,23 @@ function preferPlayback() {
 }
 
 const MUTED_KEY = "invite-muted";
+// Muting used to be remembered for good, which left the site silent on every
+// later visit. Forget any such old setting; keep it per visit from now on.
+try {
+  localStorage.removeItem(MUTED_KEY);
+} catch {
+  /* storage blocked */
+}
 const remember = (muted: boolean) => {
   try {
-    localStorage.setItem(MUTED_KEY, muted ? "1" : "0");
+    sessionStorage.setItem(MUTED_KEY, muted ? "1" : "0");
   } catch {
     /* not remembered */
   }
 };
 const wasMuted = () => {
   try {
-    return localStorage.getItem(MUTED_KEY) === "1";
+    return sessionStorage.getItem(MUTED_KEY) === "1";
   } catch {
     return false;
   }
